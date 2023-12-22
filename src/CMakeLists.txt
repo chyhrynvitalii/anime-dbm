@@ -1,0 +1,9 @@
+add_executable(dbm
+        get.c
+        get.h
+        str.c
+        str.h
+        dbm.c
+        maths.h
+        file.c
+        file.h)
