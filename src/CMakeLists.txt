@@ -1,9 +1,9 @@
-add_executable(dbm
+add_executable(anime-db
+        anime-db.c
+        file.c
+        file.h
         get.c
         get.h
-        str.c
-        str.h
-        dbm.c
         maths.h
-        file.c
-        file.h)
+        str.c
+        str.h)
