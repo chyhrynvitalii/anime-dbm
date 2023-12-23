@@ -1,11 +1,11 @@
-add_executable(anime-db
-        anime-db.c
-        anime-db-dialog.c
-        anime-db-dialog.h
-        anime-db-engine.c
-        anime-db-engine.h)
+add_executable(anime-dbm
+        anime-dbm.c
+        anime-dbm-dialog.c
+        anime-dbm-dialog.h
+        anime-dbm-engine.c
+        anime-dbm-engine.h)
 
-target_link_libraries(anime-db PUBLIC
+target_link_libraries(anime-dbm PUBLIC
         file
         get
         maths

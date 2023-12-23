@@ -7,7 +7,6 @@
 #include "str.h"
 
 // clear standard input
-
 void clr_stdin() {
     for (char c; (c = getchar()) != '\n';);
 }

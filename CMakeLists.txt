@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(anime-db C)
+project(anime-dbm C)
 
 set(CMAKE_C_STANDARD 23)
 
