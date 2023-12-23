@@ -179,7 +179,6 @@ void db_dialog() {
 
                 fclose(db);
                 free(db_name);
-
                 break;
             }
             case OPEN_DB: {
@@ -195,8 +194,8 @@ void db_dialog() {
                 }
 
                 ent_dialog(db_name);
-                free(db_name);
 
+                free(db_name);
                 break;
             }
             case SORT_DB: {
@@ -213,6 +212,7 @@ void db_dialog() {
 
                 // TODO implement sorting databases
 
+                free(db_name);
                 break;
             }
             case DEL_DB: {
@@ -231,6 +231,7 @@ void db_dialog() {
                     perror("error");
                 }
 
+                free(db_name);
                 break;
             }
             default:
