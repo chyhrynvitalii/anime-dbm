@@ -7,6 +7,7 @@
 #include "anime-db-dialog.h"
 #include "anime-db-engine.h"
 #include "get.h"
+#include "file.h"
 
 const size_t cmnd_len = 6;
 
@@ -31,9 +32,9 @@ enum db_cmnd get_db_cmnd() {
     } else if (strcasecmp(cmnd, "delete") == 0) {
         free(cmnd);
         return DEL_DB;
-    }  else if (strcasecmp(cmnd, "quit") == 0) {
+    }  else if (strcasecmp(cmnd, "close") == 0) {
         free(cmnd);
-        return QUIT;
+        return CLOSE_DBM;
     } else {
         free(cmnd);
         errno = EINVAL;
@@ -70,172 +71,227 @@ enum ent_cmnd get_ent_cmnd() {
     }
 }
 
-// list commands
-
-void ls_db_cmnds() {
-    puts("commands:\n"
-         "help\tlist commands\n"
-         "new\tnew database\n"
-         "open\topen database\n"
-         "sort\tsort database\n"
-         "delete\tdelete database\n"
-         "quit\tquit application");
+// list database commands
+// returns -1 on error, 0 on success
+int ls_db_cmnds() {
+    if (puts("commands:\n"
+             "help\tlist commands\n"
+             "new\tnew database\n"
+             "open\topen database\n"
+             "sort\tsort database\n"
+             "delete\tdelete database\n"
+             "close\tclose application") == EOF) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
-void ls_ent_cmnds() {
-    puts("commands:\n"
-         "help\tlist commands\n"
-         "new\tnew entry\n"
-         "read\tread entry\n"
-         "edit\tedit entry\n"
-         "delete\tdelete entry\n"
-         "close\tclose database");
+// list entry commands
+// returns -1 on error, 0 on success
+int ls_ent_cmnds() {
+    if (puts("commands:\n"
+             "help\tlist commands\n"
+             "new\tnew entry\n"
+             "read\tread entry\n"
+             "edit\tedit entry\n"
+             "delete\tdelete entry\n"
+             "close\tclose database") == EOF) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
-// dialogs
+// entry dialog
+// returns -1 on error, 0 on success, sets g_close_db to 1 on close
+int ent_dialog(char *db_name) {
+    // get entry command
+    enum ent_cmnd cmnd = get_ent_cmnd();
+    if (cmnd == ENT_NO_CMND) {
+        return -1;
+    }
 
-void ent_dialog(char *db_name) {
-    enum ent_cmnd cmnd;
+    // TODO implement feedback for entry commands
 
-    printf("database %s has been opened\n", db_name);
-
-    do {
-        // get entry command
-        do {
-            errno = 0;
-            cmnd = get_ent_cmnd();
-            if (cmnd == ENT_NO_CMND) {
-                perror("error");
+    switch (cmnd) {
+        case DB_HELP: {
+            // list entry commands
+            if (ls_ent_cmnds() == -1) {
+                return -1;
             }
-        } while (errno != 0);
 
-        // TODO implement feedback for entry commands
-
-        switch (cmnd) {
-            case DB_HELP: {
-                ls_ent_cmnds();
-                break;
-            }
-            case NEW_ENT: {
-                // TODO implement creating a new entry
-
-                break;
-            }
-            case READ_ENT: {
-                // TODO implement reading an entry
-
-                break;
-            }
-            case EDIT_ENT: {
-                // TODO implement editing an entry
-
-                break;
-            }
-            case DEL_ENT: {
-                // TODO implement deleting an entry
-
-                break;
-            }
-            default:
-                break;
+            return 0;
         }
-    } while(cmnd != CLOSE_DB);
+        case NEW_ENT: {
+            // TODO implement creating a new entry
 
-    printf("database %s has been closed\n", db_name);
+            return 0;
+        }
+        case READ_ENT: {
+            // TODO implement reading an entry
+
+            return 0;
+        }
+        case EDIT_ENT: {
+            // TODO implement editing an entry
+
+            return 0;
+        }
+        case DEL_ENT: {
+            // TODO implement deleting an entry
+
+            return 0;
+        }
+        case CLOSE_DB: {
+            close_db_flag = 1;
+
+            return 0;
+        }
+    }
 }
 
-void db_dialog() {
-    enum db_cmnd cmnd;
+// database dialogue
+// returns -1 on error, 0 on success, sets close_dbm_flag to 1 on close
+int db_dialog() {
+    // get db command
+    enum db_cmnd cmnd = get_db_cmnd();
+    if (cmnd == DB_NO_CMND) {
+        return -1;
+    }
 
-    do {
-        // get db command
-        do {
-            errno = 0;
-            cmnd = get_db_cmnd();
-            if (cmnd == DB_NO_CMND) {
-                perror("error");
+    switch (cmnd) {
+        case DB_HELP: {
+            // list database commands
+            if (ls_db_cmnds() == -1) {
+                return -1;
             }
-        } while (errno != 0);
 
-        // TODO implement feedback for database commands
-
-        switch (cmnd) {
-            case DB_HELP: {
-                ls_db_cmnds();
-                break;
-            }
-            case NEW_DB: {
-                char *db_name = calloc(FILENAME_MAX, sizeof(char));
-                if (get_dbname(db_name) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                FILE *db = fopen(db_name, "wx");
-                if (db == NULL) {
-                    perror("error");
-                    break;
-                }
-
-                fclose(db);
-                free(db_name);
-                break;
-            }
-            case OPEN_DB: {
-                char *db_name = calloc(FILENAME_MAX, sizeof(char));
-                if (get_dbname(db_name) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                if (access(db_name, F_OK) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                ent_dialog(db_name);
-
-                free(db_name);
-                break;
-            }
-            case SORT_DB: {
-                char *db_name = calloc(FILENAME_MAX, sizeof(char));
-                if (get_dbname(db_name) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                if (access(db_name, F_OK) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                // TODO implement sorting databases
-
-                free(db_name);
-                break;
-            }
-            case DEL_DB: {
-                char *db_name = calloc(FILENAME_MAX, sizeof(char));
-                if (get_dbname(db_name) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                if (access(db_name, F_OK) == -1) {
-                    perror("error");
-                    break;
-                }
-
-                if (remove(db_name) == -1) {
-                    perror("error");
-                }
-
-                free(db_name);
-                break;
-            }
-            default:
-                break;
+            return 0;
         }
-    } while (cmnd != QUIT);
+        case NEW_DB: {
+            // get database name
+            char *db_name = calloc(FILENAME_MAX, sizeof(char));
+            if (get_dbname(db_name) == -1) {
+                return -1;
+            }
+
+            // create database
+            FILE *db = fopen(db_name, "wx");
+            if (db == NULL) {
+                return -1;
+            } else {
+                printf("database %s has been created\n", db_name);
+            }
+
+            fclose(db);
+            free(db_name);
+
+            return 0;
+        }
+        case OPEN_DB: {
+            // list databases in current directory
+            int csv_ent_num = ls_select_dirent(".", select_csv);
+            if (csv_ent_num == -1) {
+                return -1;
+            } else if (csv_ent_num == 0) {
+                puts("there are no databases in the current directory");
+                return 0;
+            }
+
+            // get database name
+            char *db_name = calloc(FILENAME_MAX, sizeof(char));
+            if (get_dbname(db_name) == -1) {
+                return -1;
+            }
+
+            // check if database with such name exists
+            if (access(db_name, F_OK) == -1) {
+                return -1;
+            }
+
+            // open database
+            close_db_flag = 0;
+            printf("database %s has been opened\n", db_name);
+            do {
+                if (ent_dialog(db_name) == -1) {
+                    perror("error");
+                }
+            } while (close_db_flag != 1);
+            printf("database %s has been closed\n", db_name);
+
+            free(db_name);
+
+            return 0;
+        }
+        case SORT_DB: {
+            // list databases in current directory
+            int csv_ent_num = ls_select_dirent(".", select_csv);
+            if (csv_ent_num == -1) {
+                return -1;
+            } else if (csv_ent_num == 0) {
+                puts("there are no databases in the current directory");
+                return 0;
+            }
+
+            // get database name
+            char *db_name = calloc(FILENAME_MAX, sizeof(char));
+            if (get_dbname(db_name) == -1) {
+                return -1;
+            }
+
+            // check if database with such name exists
+            if (access(db_name, F_OK) == -1) {
+                return -1;
+            }
+
+            // TODO implement sorting databases
+            /*if (sort(db_name) == -1) {
+                return -1;
+            } else {
+                printf("database %s has been sorted", db_name);
+            }*/
+
+            free(db_name);
+
+            return 0;
+        }
+        case DEL_DB: {
+            // list databases in current directory
+            int csv_ent_num = ls_select_dirent(".", select_csv);
+            if (csv_ent_num == -1) {
+                return -1;
+            } else if (csv_ent_num == 0) {
+                puts("there are no databases in the current directory");
+                return 0;
+            }
+
+            // get database name
+            char *db_name = calloc(FILENAME_MAX, sizeof(char));
+            if (get_dbname(db_name) == -1) {
+                return -1;
+            }
+
+            // check if database with such name exists
+            if (access(db_name, F_OK) == -1) {
+                return -1;
+            }
+
+            // delete database
+            if (remove(db_name) == -1) {
+                return -1;
+            } else {
+                printf("database %s has been deleted", db_name);
+            }
+
+            free(db_name);
+
+            return 0;
+        }
+        case CLOSE_DBM: {
+            close_dbm_flag = 1;
+
+            return 0;
+        }
+    }
 }

@@ -59,7 +59,6 @@ void free_ent(ent ent) {
 
 // new functions
 int get_dbname(char *dbname_buf) {
-    errno = 0;
     printf("enter database name (must be a %s file): ", dbfext);
     if (get_str(FILENAME_MAX, NULL, dbname_buf) == -1) {
         return -1;
@@ -67,5 +66,6 @@ int get_dbname(char *dbname_buf) {
         errno = EINVAL;
         return -1;
     }
+
     return 0;
 }

@@ -7,7 +7,7 @@ enum db_cmnd {
     OPEN_DB,
     SORT_DB,
     DEL_DB,
-    QUIT,
+    CLOSE_DBM,
 };
 
 enum ent_cmnd {
@@ -20,11 +20,14 @@ enum ent_cmnd {
     CLOSE_DB
 };
 
+int close_db_flag;
+int close_dbm_flag;
+
 enum db_cmnd get_db_cmnd();
 enum ent_cmnd get_ent_cmnd();
 
-void ls_db_cmnds();
-void ls_ent_cmnds();
+int ls_db_cmnds();
+int ls_ent_cmnds();
 
-void db_dialog();
-void ent_dialog(char *);
+int db_dialog();
+int ent_dialog(char *);
