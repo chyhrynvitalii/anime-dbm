@@ -16,12 +16,12 @@ int get_fsize(char *fname, size_t *size_buf) {
 }
 
 int ls_fnames_w_fext(char *dname, char *fext) {
-    DIR *cur_dir = opendir(dname);
-    if (cur_dir == NULL) {
+    DIR *dir = opendir(dname);
+    if (dir == NULL) {
         return -1;
     }
     struct dirent *dir_ent;
-    while ((dir_ent = readdir(cur_dir)) != NULL) {
+    while ((dir_ent = readdir(dir)) != NULL) {
         if (ends_w_substr(dir_ent->d_name, fext)) {
             puts(dir_ent->d_name);
         }
