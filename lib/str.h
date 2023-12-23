@@ -2,7 +2,7 @@
 
 bool has_char(char *, char);
 bool ends_w_char(char *, char);
-bool ends_w_substr(char *, char *);
+bool ends_w_substr(char *, const char *);
 
 bool is_int(char *);
 bool is_uint(char *);

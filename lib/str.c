@@ -9,15 +9,15 @@ bool is_whitespace(char *str) {
 	return strspn(str, " \t\n\v\r") == strlen(str);
 }
 
-bool has_char(char *str, char c) {
+bool has_char(char *str, const char c) {
     return strchr(str, c) != NULL;
 }
 
-bool ends_w_char(char *str, char c) {
+bool ends_w_char(char *str, const char c) {
     return strrchr(str, c) == str + strlen(str) - 1;
 }
 
-bool ends_w_substr(char *str, char *substr) {
+bool ends_w_substr(char *str, const char *substr) {
     char *endstr = str;
     while ((endstr = strstr(endstr, substr)) != NULL) {
         if (endstr[strlen(substr)] == '\0') {

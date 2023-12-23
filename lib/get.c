@@ -18,7 +18,10 @@ void clr_stdin() {
 int get_int(size_t buf_len, const char *get_msg, int *int_buf) {
     char *buf = calloc(buf_pad(buf_len), sizeof(char));
 
-    fputs(get_msg, stdout);
+    if (get_msg != NULL) {
+        fputs(get_msg, stdout);
+    }
+
     fgets(buf, buf_pad(buf_len), stdin);
 
     if (!ends_w_char(buf, '\n')) {
@@ -40,7 +43,10 @@ int get_int(size_t buf_len, const char *get_msg, int *int_buf) {
 int get_uint(size_t buf_len, const char *get_msg, unsigned *uint_buf) {
     char *buf = calloc(buf_pad(buf_len), sizeof(char));
 
-    fputs(get_msg, stdout);
+    if (get_msg != NULL) {
+        fputs(get_msg, stdout);
+    }
+
     fgets(buf, buf_pad(buf_len), stdin);
 
     if (!ends_w_char(buf, '\n')) {
@@ -62,7 +68,10 @@ int get_uint(size_t buf_len, const char *get_msg, unsigned *uint_buf) {
 int get_float(size_t buf_len, const char *get_msg, float *float_buf) {
     char *buf = calloc(buf_pad(buf_len), sizeof(char));
 
-    fputs(get_msg, stdout);
+    if (get_msg != NULL) {
+        fputs(get_msg, stdout);
+    }
+
     fgets(buf, buf_pad(buf_len), stdin);
 
     if (!ends_w_char(buf, '\n')) {
@@ -84,7 +93,10 @@ int get_float(size_t buf_len, const char *get_msg, float *float_buf) {
 int get_double(size_t buf_len, const char *get_msg, double *double_buf) {
     char *buf = calloc(buf_pad(buf_len), sizeof(char));
 
-    fputs(get_msg, stdout);
+    if (get_msg != NULL) {
+        fputs(get_msg, stdout);
+    }
+
     fgets(buf, buf_pad(buf_len), stdin);
 
     if (!ends_w_char(buf, '\n')) {
@@ -104,7 +116,10 @@ int get_double(size_t buf_len, const char *get_msg, double *double_buf) {
 }
 
 int get_str(size_t buf_len, const char *get_msg, char *str_buf) {
-    fputs(get_msg, stdout);
+    if (get_msg != NULL) {
+        fputs(get_msg, stdout);
+    }
+
     fgets(str_buf, buf_pad(buf_len), stdin);
 
     if (!ends_w_char(str_buf, '\n')) {
