@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "anime-db-dialog.h"
+#include "anime-dbm-dialog.h"
 
 int main() {
     close_dbm_flag = 0;
