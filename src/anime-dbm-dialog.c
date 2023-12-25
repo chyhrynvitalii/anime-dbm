@@ -6,12 +6,10 @@
 
 #include "anime-dbm-dialog.h"
 #include "anime-dbm-engine.h"
-#include "get.h"
 #include "file.h"
+#include "get.h"
 
 const size_t cmnd_len = 6;
-
-// get commands
 
 enum db_cmnd get_db_cmnd() {
     char *cmnd = calloc(cmnd_len, sizeof(char));
@@ -71,8 +69,6 @@ enum ent_cmnd get_ent_cmnd() {
     }
 }
 
-// list database commands
-// returns -1 on error, 0 on success
 int ls_db_cmnds() {
     if (puts("commands:\n"
              "help\tlist commands\n"
@@ -87,8 +83,6 @@ int ls_db_cmnds() {
     }
 }
 
-// list entry commands
-// returns -1 on error, 0 on success
 int ls_ent_cmnds() {
     if (puts("commands:\n"
              "help\tlist commands\n"
@@ -103,8 +97,6 @@ int ls_ent_cmnds() {
     }
 }
 
-// entry dialog
-// returns -1 on error, 0 on success, sets g_close_db to 1 on close
 int ent_dialog(char *dbname) {
     // get entry command
     enum ent_cmnd cmnd = get_ent_cmnd();
@@ -338,8 +330,6 @@ int ent_dialog(char *dbname) {
     }
 }
 
-// database dialogue
-// returns -1 on error, 0 on success, sets close_dbm_flag to 1 on close
 int db_dialog() {
     // get db command
     enum db_cmnd cmnd = get_db_cmnd();

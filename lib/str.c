@@ -3,8 +3,6 @@
 
 #include "str.h"
 
-// parse strings
-
 bool is_whitespace(char *str) {
 	return strspn(str, " \t\n\v\r") == strlen(str);
 }
@@ -27,8 +25,6 @@ bool ends_w_substr(char *str, const char *substr) {
     }
     return false;
 }
-
-// parse strings as values
 
 bool is_int(char *str) {
 	char *end_ptr;

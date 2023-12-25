@@ -2,7 +2,6 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "anime-dbm-engine.h"
 #include "get.h"
@@ -18,7 +17,6 @@ const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, ent_
 // domain of score
 const float score_low = 0, score_up = 10;
 
-// entry print / scan formats
 const char *ent_printf_csv = "\"%s\",\"%s\",%.2f,%u\n";
 const char *ent_printf_toml = "[%s]\n"
                               "status = \"%s\"\n"
@@ -27,14 +25,12 @@ const char *ent_printf_toml = "[%s]\n"
 const char *ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
 const char *title_printf_toml = "[%s]\n";
 
-// entry member list formats
 const char *ent_memb_ls_toml = "[title]\n"
                                "status\n"
                                "score\n"
                                "progress\n";
 
-// allocates memory for an entry
-// returns NULL on error, pointer to an allocated entry on success
+
 ent *alloc_ent() {
     ent *ent = calloc(1, sizeof(*ent));
     if ((ent->title = calloc(title_len, sizeof(char))) == NULL) {
@@ -46,7 +42,6 @@ ent *alloc_ent() {
     return ent;
 }
 
-// deallocates memory pointed by an entry pointer
 void free_ent(ent *ent) {
     free(ent->title);
     free(ent->status);
@@ -83,8 +78,6 @@ int get_ent_prog(ent *ent) {
     return 0;
 }
 
-// get an entry, store it in a pointer
-// returns -1 on error, 0 on success
 int get_ent(ent *ent) {
     if (get_ent_title(ent) == -1) {
         return -1;
@@ -101,8 +94,6 @@ int get_ent(ent *ent) {
     return 0;
 }
 
-// get a database name
-// returns -1 on error, 0 on success
 int get_dbname(char *dbname_buf) {
     printf("enter database name (must be a %s file): ", csvfext);
     if (get_str(FILENAME_MAX, NULL, dbname_buf) == -1) {
@@ -115,8 +106,6 @@ int get_dbname(char *dbname_buf) {
     return 0;
 }
 
-// appends an entry to a database
-// returns -1 on error, 0 on success
 int append_ent(char *dbname, ent *ent) {
     FILE *db = fopen(dbname, "a");
     if (db == NULL) {
@@ -131,8 +120,6 @@ int append_ent(char *dbname, ent *ent) {
     return 0;
 }
 
-// calculates a number of entries in a database
-// returns -1 on error, number of entries in database on success
 int get_ent_num(char *dbname) {
     int ent_num = 0;
     FILE *db = fopen(dbname, "r");
@@ -147,8 +134,6 @@ int get_ent_num(char *dbname) {
     return ent_num;
 }
 
-// scans a database for a specified number of entries, store result in an entry pointer
-// returns -1 on error, 0 on success
 int scan_db(char *dbname, const char *scan_format, ent **ent, int ent_num) {
     FILE *db = fopen(dbname, "r");
     if (db == NULL) {
@@ -161,8 +146,6 @@ int scan_db(char *dbname, const char *scan_format, ent **ent, int ent_num) {
     return 0;
 }
 
-// prints out an entry to stdin with a specified format
-// returns -1 on error, 0 on success
 int printf_ent(ent *ent, const char *print_format) {
     if (printf(print_format, ent->title, ent->status, ent->score, ent->prog) < 0) {
         return -1;
@@ -170,8 +153,6 @@ int printf_ent(ent *ent, const char *print_format) {
     return 0;
 }
 
-// prints out titles of entries to stdin with a specified format
-// returns -1 on error, 0 on success
 int ls_titles(ent **ents, const char *print_format, int ent_num) {
     for (int i = 0; i < ent_num; ++i) {
         if (printf(print_format, ents[i]->title) < 0) {
@@ -181,8 +162,6 @@ int ls_titles(ent **ents, const char *print_format, int ent_num) {
     return 0;
 }
 
-// searches through an array of entry pointers for a matching title
-// returns a pointer to an entry with a matching title, NULL if no matches have been found
 ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num) {
     for (int i = 0; i < ent_num; ++i) {
         if (strcmp(ents[i]->title, title) == 0) {
@@ -192,8 +171,6 @@ ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num) {
     return NULL;
 }
 
-// erases a database
-// returns -1 on error, 0 on success
 int erase_db(char *dbname) {
     FILE *db = fopen(dbname, "w");
     if (db == NULL) {
@@ -202,8 +179,6 @@ int erase_db(char *dbname) {
     return 0;
 }
 
-// get sorting order
-// returns NO_SORT_ORD and sets errno on error, sorting order on success
 enum sort_ord get_sort_ord() {
     char *sort_ord = calloc(sort_ord_len, sizeof(char));
     if (get_str(sort_ord_len, "sorting order (ascending or descending): ", sort_ord) == -1) {
@@ -222,8 +197,6 @@ enum sort_ord get_sort_ord() {
     }
 }
 
-// get entry member
-// returns NO_ENT_MEMB and sets errno on error, entry member on success
 enum ent_memb get_ent_memb() {
     char *ent_member_name = calloc(title_len, sizeof(char));
     if (get_str(ent_member_len, "entry member: ", ent_member_name) == -1) {
@@ -294,8 +267,6 @@ int compar_prog_desc(const void *ent1, const void *ent2) {
     return compar_prog_asc(ent2, ent1);
 }
 
-// sorts database
-// returns -1 on error, 0 on success
 int sort_ents(ent **ents, int ent_num, enum ent_memb ent_memb, enum sort_ord sort_ord) {
     int (*compar_ent_memb)(const void *, const void*);
     switch (ent_memb) {
