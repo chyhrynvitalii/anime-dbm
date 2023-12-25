@@ -108,9 +108,6 @@ int ls_ent_cmnds() {
 int ent_dialog(char *dbname) {
     // get entry command
     enum ent_cmnd cmnd = get_ent_cmnd();
-    if (cmnd == ENT_NO_CMND) {
-        return -1;
-    }
 
     // TODO implement feedback for entry commands
 
@@ -124,7 +121,6 @@ int ent_dialog(char *dbname) {
             return 0;
         }
         case NEW_ENT: {
-            // TODO implement creating a new entry
             ent *ent = alloc_ent();
             if (ent == NULL) {
                 return -1;
@@ -156,19 +152,19 @@ int ent_dialog(char *dbname) {
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
                 return -1;
             }
-            if (list_titles(ents, title_printf_toml, ent_num) == -1) {
+            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
                 return -1;
             }
             char *ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", ent_title) == -1) {
                 return -1;
             }
-            ent *chosen_ent;
-            if ((chosen_ent = get_ent_w_match_title(ents, ent_title, ent_num)) == NULL) {
+            ent *chos_ent;
+            if ((chos_ent = get_ent_w_match_title(ents, ent_title, ent_num)) == NULL) {
                 errno = EINVAL;
                 return -1;
             }
-            if (printf_ent(chosen_ent, ent_printf_toml) == -1) {
+            if (printf_ent(chos_ent, ent_printf_toml) == -1) {
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
@@ -178,8 +174,80 @@ int ent_dialog(char *dbname) {
             return 0;
         }
         case EDIT_ENT: {
-            // TODO implement editing an entry
-
+            int ent_num = get_ent_num(dbname);
+            if (ent_num == -1) {
+                return -1;
+            } else if (ent_num == 0) {
+                puts("there are no entries in the database");
+                return 0;
+            }
+            ent **ents = calloc(ent_num, sizeof(ent));
+            for (int i = 0; i < ent_num; ++i) {
+                ents[i] = alloc_ent();
+                if (ents[i] == NULL) {
+                    return -1;
+                }
+            }
+            if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+                return -1;
+            }
+            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
+                return -1;
+            }
+            char *chosen_ent_title = calloc(title_len, sizeof(char));
+            if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
+                return -1;
+            }
+            ent *chos_ent;
+            if ((chos_ent = get_ent_w_match_title(ents, chosen_ent_title, ent_num)) == NULL) {
+                errno = EINVAL;
+                return -1;
+            }
+            printf("%s", ent_memb_ls_toml);
+            enum ent_memb chos_ent_memb = get_ent_memb();
+            switch (chos_ent_memb) {
+                case TITLE: {
+                    if (get_ent_title(chos_ent) == -1) {
+                        return -1;
+                    }
+                    break;
+                }
+                case STATUS: {
+                    if (get_ent_status(chos_ent) == -1) {
+                        return -1;
+                    }
+                    break;
+                }
+                case SCORE: {
+                    if (get_ent_score(chos_ent) == -1) {
+                        return -1;
+                    }
+                    break;
+                }
+                case PROG: {
+                    if (get_ent_prog(chos_ent) == -1) {
+                        return -1;
+                    }
+                    break;
+                }
+                case NO_ENT_MEMB: {
+                    return -1;
+                }
+            }
+            if (erase_db(dbname) == -1) {
+                return -1;
+            }
+            for (int i = 0; i < ent_num; ++i) {
+                if (append_ent(dbname, ents[i]) == -1) {
+                    return -1;
+                }
+            }
+            printf("entry %s has been edited", chosen_ent_title);
+            for (int i = 0; i < ent_num; ++i) {
+                free_ent(ents[i]);
+            }
+            free(ents);
+            free(chosen_ent_title);
             return 0;
         }
         case DEL_ENT: {
@@ -200,15 +268,15 @@ int ent_dialog(char *dbname) {
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
                 return -1;
             }
-            if (list_titles(ents, title_printf_toml, ent_num) == -1) {
+            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
                 return -1;
             }
-            char *chosen_ent_title = calloc(title_len, sizeof(char));
-            if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
+            char *chos_ent_title = calloc(title_len, sizeof(char));
+            if (get_str(title_len, "title: ", chos_ent_title) == -1) {
                 return -1;
             }
-            ent *chosen_ent;
-            if ((chosen_ent = get_ent_w_match_title(ents, chosen_ent_title, ent_num)) == NULL) {
+            ent *chos_ent;
+            if ((chos_ent = get_ent_w_match_title(ents, chos_ent_title, ent_num)) == NULL) {
                 errno = EINVAL;
                 return -1;
             }
@@ -216,24 +284,27 @@ int ent_dialog(char *dbname) {
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
-                if (ents[i] != chosen_ent) {
+                if (ents[i] != chos_ent) {
                     if (append_ent(dbname, ents[i]) == -1) {
                         return -1;
                     }
                 }
             }
-            printf("entry %s has been deleted", chosen_ent_title);
+            printf("entry %s has been deleted", chos_ent_title);
             for (int i = 0; i < ent_num; ++i) {
                 free_ent(ents[i]);
             }
             free(ents);
-            free(chosen_ent_title);
+            free(chos_ent_title);
             return 0;
         }
         case CLOSE_DB: {
             close_db_flag = 1;
 
             return 0;
+        }
+        case ENT_NO_CMND: {
+            return -1;
         }
     }
 }
@@ -243,9 +314,6 @@ int ent_dialog(char *dbname) {
 int db_dialog() {
     // get db command
     enum db_cmnd cmnd = get_db_cmnd();
-    if (cmnd == DB_NO_CMND) {
-        return -1;
-    }
 
     switch (cmnd) {
         case DB_HELP: {
@@ -379,6 +447,9 @@ int db_dialog() {
             close_dbm_flag = 1;
 
             return 0;
+        }
+        case DB_NO_CMND: {
+            return -1;
         }
     }
 }

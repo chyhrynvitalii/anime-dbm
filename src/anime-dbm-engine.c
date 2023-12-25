@@ -12,7 +12,7 @@
 const char *csvfext= ".csv";
 
 // length of entry members
-const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4;
+const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, ent_member_len = 8;
 
 // domain of score
 const float score_low = 0, score_up = 10;
@@ -25,6 +25,12 @@ const char *ent_printf_toml = "[%s]\n"
                               "progress = %u\n";
 const char *ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
 const char *title_printf_toml = "[%s]\n";
+
+// entry member list formats
+const char *ent_memb_ls_toml = "[title]\n"
+                                 "status\n"
+                                 "score\n"
+                                 "progress\n";
 
 // allocates memory for an entry
 // returns NULL on error, pointer to an allocated entry on success
@@ -45,25 +51,52 @@ void free_ent(ent *ent) {
     free(ent->status);
 }
 
-// get an entry, store it in a pointer
-// returns -1 on error, 0 on success
-int get_ent(ent *ent) {
+int get_ent_title(ent *ent) {
     if (get_str(title_len, "title: ", ent->title) == -1) {
         return -1;
     }
+    return 0;
+}
+
+int get_ent_status(ent *ent) {
     if (get_str(status_len, "status: ", ent->status) == -1) {
         return -1;
     }
+    return 0;
+}
+
+int get_ent_score(ent *ent) {
     if (get_float(score_len, "score: ", &ent->score) == -1) {
         return -1;
     } else if (!in_closed_range(ent->score, score_low, score_up)) {
         errno = EDOM;
         return -1;
     }
+    return 0;
+}
+
+int get_ent_prog(ent *ent) {
     if (get_uint(prog_len, "progress: ", &ent->prog) == -1) {
         return -1;
     }
+    return 0;
+}
 
+// get an entry, store it in a pointer
+// returns -1 on error, 0 on success
+int get_ent(ent *ent) {
+    if (get_ent_title(ent) == -1) {
+        return -1;
+    }
+    if (get_ent_status(ent) == -1) {
+        return -1;
+    }
+    if (get_ent_score(ent) == -1) {
+        return -1;
+    }
+    if (get_ent_prog(ent) == -1) {
+        return -1;
+    }
     return 0;
 }
 
@@ -138,7 +171,7 @@ int printf_ent(ent *ent, const char *print_format) {
 
 // prints out titles of entries to stdin with a specified format
 // returns -1 on error, 0 on success
-int list_titles(ent **ents, const char *print_format, int ent_num) {
+int ls_titles(ent **ents, const char *print_format, int ent_num) {
     for (int i = 0; i < ent_num; ++i) {
         if (printf(print_format, ents[i]->title) < 0) {
             return -1;
@@ -166,4 +199,30 @@ int erase_db(char *dbname) {
         return -1;
     }
     return 0;
+}
+
+// get entry member
+// returns NO_ENT_MEMB and sets errno on error, entry member on success
+enum ent_memb get_ent_memb() {
+    char *ent_member_name = calloc(title_len, sizeof(char));
+    if (get_str(ent_member_len, "entry member: ", ent_member_name) == -1) {
+        return -1;
+    }
+    if (strcasecmp(ent_member_name, "title") == 0) {
+        free(ent_member_name);
+        return TITLE;
+    } else if (strcasecmp(ent_member_name, "status") == 0) {
+        free(ent_member_name);
+        return STATUS;
+    } else if (strcasecmp(ent_member_name, "score") == 0) {
+        free(ent_member_name);
+        return SCORE;
+    } else if (strcasecmp(ent_member_name, "progress") == 0) {
+        free(ent_member_name);
+        return PROG;
+    } else {
+        free(ent_member_name);
+        errno = EINVAL;
+        return NO_ENT_MEMB;
+    }
 }
