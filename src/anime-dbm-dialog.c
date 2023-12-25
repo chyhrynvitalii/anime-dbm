@@ -109,8 +109,6 @@ int ent_dialog(char *dbname) {
     // get entry command
     enum ent_cmnd cmnd = get_ent_cmnd();
 
-    // TODO implement feedback for entry commands
-
     switch (cmnd) {
         case DB_HELP: {
             // list entry commands
@@ -131,6 +129,7 @@ int ent_dialog(char *dbname) {
             if (append_ent(dbname, ent) == -1) {
                 return -1;
             }
+            printf("entry %s has been created", ent->title);
             free_ent(ent);
             return 0;
         }
