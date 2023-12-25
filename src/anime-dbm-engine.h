@@ -38,3 +38,4 @@ int scan_db(char *, const char *, ent **, int);
 int printf_ent(ent *, const char *);
 int list_titles(ent **, const char *, int);
 ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num);
+int erase_db(char *dbname);

@@ -183,8 +183,51 @@ int ent_dialog(char *dbname) {
             return 0;
         }
         case DEL_ENT: {
-            // TODO implement deleting an entry
-
+            int ent_num = get_ent_num(dbname);
+            if (ent_num == -1) {
+                return -1;
+            } else if (ent_num == 0) {
+                puts("there are no entries in the database");
+                return 0;
+            }
+            ent **ents = calloc(ent_num, sizeof(ent));
+            for (int i = 0; i < ent_num; ++i) {
+                ents[i] = alloc_ent();
+                if (ents[i] == NULL) {
+                    return -1;
+                }
+            }
+            if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+                return -1;
+            }
+            if (list_titles(ents, title_printf_toml, ent_num) == -1) {
+                return -1;
+            }
+            char *chosen_ent_title = calloc(title_len, sizeof(char));
+            if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
+                return -1;
+            }
+            ent *chosen_ent;
+            if ((chosen_ent = get_ent_w_match_title(ents, chosen_ent_title, ent_num)) == NULL) {
+                errno = EINVAL;
+                return -1;
+            }
+            if (erase_db(dbname) == -1) {
+                return -1;
+            }
+            for (int i = 0; i < ent_num; ++i) {
+                if (ents[i] != chosen_ent) {
+                    if (append_ent(dbname, ents[i]) == -1) {
+                        return -1;
+                    }
+                }
+            }
+            printf("entry %s has been deleted", chosen_ent_title);
+            for (int i = 0; i < ent_num; ++i) {
+                free_ent(ents[i]);
+            }
+            free(ents);
+            free(chosen_ent_title);
             return 0;
         }
         case CLOSE_DB: {

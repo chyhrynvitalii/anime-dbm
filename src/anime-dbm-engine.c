@@ -23,7 +23,7 @@ const char *ent_printf_toml = "[%s]\n"
                               "status = \"%s\"\n"
                               "score = %.2f\n"
                               "progress = %u\n";
-const char *ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u";
+const char *ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
 const char *title_printf_toml = "[%s]\n";
 
 // allocates memory for an entry
@@ -67,7 +67,7 @@ int get_ent(ent *ent) {
     return 0;
 }
 
-// get database name
+// get a database name
 // returns -1 on error, 0 on success
 int get_dbname(char *dbname_buf) {
     printf("enter database name (must be a %s file): ", csvfext);
@@ -81,7 +81,7 @@ int get_dbname(char *dbname_buf) {
     return 0;
 }
 
-// append an entry to a database
+// appends an entry to a database
 // returns -1 on error, 0 on success
 int append_ent(char *dbname, ent *ent) {
     FILE *db = fopen(dbname, "a");
@@ -97,7 +97,7 @@ int append_ent(char *dbname, ent *ent) {
     return 0;
 }
 
-// calculate number of entries in a database
+// calculates a number of entries in a database
 // returns -1 on error, number of entries in database on success
 int get_ent_num(char *dbname) {
     int ent_num = 0;
@@ -113,7 +113,7 @@ int get_ent_num(char *dbname) {
     return ent_num;
 }
 
-// scan database for a specified number of entries, store result in an entry pointer
+// scans a database for a specified number of entries, store result in an entry pointer
 // returns -1 on error, 0 on success
 int scan_db(char *dbname, const char *scan_format, ent **ent, int ent_num) {
     FILE *db = fopen(dbname, "r");
@@ -127,7 +127,7 @@ int scan_db(char *dbname, const char *scan_format, ent **ent, int ent_num) {
     return 0;
 }
 
-// print out an entry to stdin with a specified format
+// prints out an entry to stdin with a specified format
 // returns -1 on error, 0 on success
 int printf_ent(ent *ent, const char *print_format) {
     if (printf(print_format, ent->title, ent->status, ent->score, ent->prog) < 0) {
@@ -136,7 +136,7 @@ int printf_ent(ent *ent, const char *print_format) {
     return 0;
 }
 
-// print out titles of entries to stdin with a specified format
+// prints out titles of entries to stdin with a specified format
 // returns -1 on error, 0 on success
 int list_titles(ent **ents, const char *print_format, int ent_num) {
     for (int i = 0; i < ent_num; ++i) {
@@ -156,4 +156,14 @@ ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num) {
         }
     }
     return NULL;
+}
+
+// erases a database
+// returns -1 on error, 0 on success
+int erase_db(char *dbname) {
+    FILE *db = fopen(dbname, "w");
+    if (db == NULL) {
+        return -1;
+    }
+    return 0;
 }
