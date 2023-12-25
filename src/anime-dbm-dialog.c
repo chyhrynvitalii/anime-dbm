@@ -124,9 +124,11 @@ int ent_dialog(char *dbname) {
                 return -1;
             }
             if (get_ent(ent) == -1) {
+                free_ent(ent);
                 return -1;
             }
             if (append_ent(dbname, ent) == -1) {
+                free_ent(ent);
                 return -1;
             }
             printf("entry %s has been created", ent->title);
@@ -145,31 +147,59 @@ int ent_dialog(char *dbname) {
             for (int i = 0; i < ent_num; ++i) {
                 ents[i] = alloc_ent();
                 if (ents[i] == NULL) {
+                    for (int j = 0; j < i; ++j) {
+                        free_ent(ents[j]);
+                    }
+                    free(ents);
                     return -1;
                 }
             }
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             char *ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", ent_title) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(ent_title);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, ent_title, ent_num)) == NULL) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(ent_title);
                 errno = EINVAL;
                 return -1;
             }
             if (printf_ent(chos_ent, ent_printf_toml) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(ent_title);
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
                 free_ent(ents[i]);
             }
             free(ents);
+            free(ent_title);
             return 0;
         }
         case EDIT_ENT: {
@@ -184,6 +214,10 @@ int ent_dialog(char *dbname) {
             for (int i = 0; i < ent_num; ++i) {
                 ents[i] = alloc_ent();
                 if (ents[i] == NULL) {
+                    for (int j = 0; j < i; ++j) {
+                        free_ent(ents[j]);
+                    }
+                    free(ents);
                     return -1;
                 }
             }
@@ -191,14 +225,28 @@ int ent_dialog(char *dbname) {
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             char *chosen_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(chosen_ent_title);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, chosen_ent_title, ent_num)) == NULL) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(chosen_ent_title);
                 errno = EINVAL;
                 return -1;
             }
@@ -207,37 +255,72 @@ int ent_dialog(char *dbname) {
             switch (chos_ent_memb) {
                 case TITLE: {
                     if (get_ent_title(chos_ent) == -1) {
+                        for (int i = 0; i < ent_num; ++i) {
+                            free_ent(ents[i]);
+                        }
+                        free(ents);
+                        free(chosen_ent_title);
                         return -1;
                     }
                     break;
                 }
                 case STATUS: {
                     if (get_ent_status(chos_ent) == -1) {
+                        for (int i = 0; i < ent_num; ++i) {
+                            free_ent(ents[i]);
+                        }
+                        free(ents);
+                        free(chosen_ent_title);
                         return -1;
                     }
                     break;
                 }
                 case SCORE: {
                     if (get_ent_score(chos_ent) == -1) {
+                        for (int i = 0; i < ent_num; ++i) {
+                            free_ent(ents[i]);
+                        }
+                        free(ents);
+                        free(chosen_ent_title);
                         return -1;
                     }
                     break;
                 }
                 case PROG: {
                     if (get_ent_prog(chos_ent) == -1) {
+                        for (int i = 0; i < ent_num; ++i) {
+                            free_ent(ents[i]);
+                        }
+                        free(ents);
+                        free(chosen_ent_title);
                         return -1;
                     }
                     break;
                 }
                 case NO_ENT_MEMB: {
+                    for (int i = 0; i < ent_num; ++i) {
+                        free_ent(ents[i]);
+                    }
+                    free(ents);
+                    free(chosen_ent_title);
                     return -1;
                 }
             }
             if (erase_db(dbname) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(chosen_ent_title);
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
                 if (append_ent(dbname, ents[i]) == -1) {
+                    for (int j = 0; j < ent_num; ++j) {
+                        free_ent(ents[j]);
+                    }
+                    free(ents);
+                    free(chosen_ent_title);
                     return -1;
                 }
             }
@@ -261,30 +344,61 @@ int ent_dialog(char *dbname) {
             for (int i = 0; i < ent_num; ++i) {
                 ents[i] = alloc_ent();
                 if (ents[i] == NULL) {
+                    for (int j = 0; j < i; ++j) {
+                        free_ent(ents[j]);
+                    }
+                    free(ents);
                     return -1;
                 }
             }
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             char *chos_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chos_ent_title) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, chos_ent_title, ent_num)) == NULL) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(chos_ent_title);
                 errno = EINVAL;
                 return -1;
             }
             if (erase_db(dbname) == -1) {
+                for (int i = 0; i < ent_num; ++i) {
+                    free_ent(ents[i]);
+                }
+                free(ents);
+                free(chos_ent_title);
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
                 if (ents[i] != chos_ent) {
                     if (append_ent(dbname, ents[i]) == -1) {
+                        for (int j = 0; j < ent_num; ++j) {
+                            free_ent(ents[j]);
+                        }
+                        free(ents);
+                        free(chos_ent_title);
                         return -1;
                     }
                 }

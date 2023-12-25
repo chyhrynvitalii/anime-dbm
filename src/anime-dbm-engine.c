@@ -226,3 +226,24 @@ enum ent_memb get_ent_memb() {
         return NO_ENT_MEMB;
     }
 }
+
+int sort_db(char *dbname) {
+    int ent_num = get_ent_num(dbname);
+    if (ent_num == -1) {
+        return -1;
+    } else if (ent_num == 0) {
+        puts("there are no entries in the database");
+        return 0;
+    }
+    ent **ents = calloc(ent_num, sizeof(ent));
+    for (int i = 0; i < ent_num; ++i) {
+        ents[i] = alloc_ent();
+        if (ents[i] == NULL) {
+            return -1;
+        }
+    }
+    if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+        return -1;
+    }
+
+}
