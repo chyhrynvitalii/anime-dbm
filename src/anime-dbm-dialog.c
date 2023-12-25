@@ -102,6 +102,7 @@ int ent_dialog(char *dbname) {
     enum ent_cmnd cmnd = get_ent_cmnd();
 
     switch (cmnd) {
+        // TODO implement keeping sorting
         case DB_HELP: {
             // list entry commands
             if (ls_ent_cmnds() == -1) {
