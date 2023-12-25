@@ -21,7 +21,7 @@ typedef struct {
     unsigned prog;
 } ent;
 
-extern const size_t title_len, status_len, score_len, prog_len;
+extern const size_t title_len;
 
 extern const char *ent_printf_csv;
 extern const char *ent_printf_toml;
@@ -45,4 +45,8 @@ int printf_ent(ent *, const char *);
 int ls_titles(ent **ents, const char *print_format, int ent_num);
 ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num);
 int erase_db(char *dbname);
+enum sort_ord get_sort_ord();
 enum ent_memb get_ent_memb();
+int sort_ents(ent **, int, enum ent_memb, enum sort_ord);
+void free_ents(ent **, int);
+ent **alloc_ents(int);

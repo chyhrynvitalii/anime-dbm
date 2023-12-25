@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "anime-dbm-engine.h"
 #include "get.h"
@@ -12,7 +13,7 @@
 const char *csvfext= ".csv";
 
 // length of entry members
-const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, ent_member_len = 8;
+const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, ent_member_len = 8, sort_ord_len = 16;
 
 // domain of score
 const float score_low = 0, score_up = 10;
@@ -28,9 +29,9 @@ const char *title_printf_toml = "[%s]\n";
 
 // entry member list formats
 const char *ent_memb_ls_toml = "[title]\n"
-                                 "status\n"
-                                 "score\n"
-                                 "progress\n";
+                               "status\n"
+                               "score\n"
+                               "progress\n";
 
 // allocates memory for an entry
 // returns NULL on error, pointer to an allocated entry on success
@@ -201,6 +202,26 @@ int erase_db(char *dbname) {
     return 0;
 }
 
+// get sorting order
+// returns NO_SORT_ORD and sets errno on error, sorting order on success
+enum sort_ord get_sort_ord() {
+    char *sort_ord = calloc(sort_ord_len, sizeof(char));
+    if (get_str(sort_ord_len, "sorting order (ascending or descending): ", sort_ord) == -1) {
+        return -1;
+    }
+    if (strcasecmp(sort_ord, "ascending") == 0) {
+        free(sort_ord);
+        return ASC;
+    } else if (strcasecmp(sort_ord, "descending") == 0) {
+        free(sort_ord);
+        return DESC;
+    } else {
+        free(sort_ord);
+        errno = EINVAL;
+        return NO_SORT_ORD;
+    }
+}
+
 // get entry member
 // returns NO_ENT_MEMB and sets errno on error, entry member on success
 enum ent_memb get_ent_memb() {
@@ -227,23 +248,144 @@ enum ent_memb get_ent_memb() {
     }
 }
 
-int sort_db(char *dbname) {
-    int ent_num = get_ent_num(dbname);
-    if (ent_num == -1) {
+int compar_title_asc(const void *ent1, const void *ent2) {
+    ent *ent1_cast = *(ent **)ent1;
+    ent *ent2_cast = *(ent **)ent2;
+    return strcmp(ent1_cast->title, ent2_cast->title);
+}
+
+int compar_status_asc(const void *ent1, const void *ent2) {
+    ent *ent1_cast = *(ent **)ent1;
+    ent *ent2_cast = *(ent **)ent2;
+    return strcmp(ent1_cast->status, ent2_cast->status);
+}
+
+int compar_score_asc(const void *ent1, const void *ent2) {
+    ent *ent1_cast = *(ent **)ent1;
+    ent *ent2_cast = *(ent **)ent2;
+    if (ent1_cast->score > ent2_cast->score) {
+        return 1;
+    } else if (ent1_cast->score < ent2_cast->score) {
         return -1;
-    } else if (ent_num == 0) {
-        puts("there are no entries in the database");
+    } else {
         return 0;
     }
+}
+
+int compar_prog_asc(const void *ent1, const void *ent2) {
+    ent *ent1_cast = *(ent **)ent1;
+    ent *ent2_cast = *(ent **)ent2;
+    return (int)(ent1_cast->prog - ent2_cast->prog);
+}
+
+int compar_title_desc(const void *ent1, const void *ent2) {
+    return compar_title_asc(ent2, ent1);
+}
+
+int compar_status_desc(const void *ent1, const void *ent2) {
+    return compar_status_asc(ent2, ent1);
+}
+
+int compar_score_desc(const void *ent1, const void *ent2) {
+    return compar_score_asc(ent2, ent1);
+}
+
+int compar_prog_desc(const void *ent1, const void *ent2) {
+    return compar_prog_asc(ent2, ent1);
+}
+
+// sorts database
+// returns -1 on error, 0 on success
+int sort_ents(ent **ents, int ent_num, enum ent_memb ent_memb, enum sort_ord sort_ord) {
+    int (*compar_ent_memb)(const void *, const void*);
+    switch (ent_memb) {
+        case TITLE: {
+            switch (sort_ord) {
+                case ASC: {
+                    compar_ent_memb = compar_title_asc;
+                    break;
+                }
+                case DESC: {
+                    compar_ent_memb = compar_title_desc;
+                    break;
+                }
+                case NO_SORT_ORD: {
+                    return -1;
+                }
+            }
+            break;
+        }
+        case STATUS: {
+            switch (sort_ord) {
+                case ASC: {
+                    compar_ent_memb = compar_status_asc;
+                    break;
+                }
+                case DESC: {
+                    compar_ent_memb = compar_status_desc;
+                    break;
+                }
+                case NO_SORT_ORD: {
+                    return -1;
+                }
+            }
+            break;
+        }
+        case SCORE: {
+            switch (sort_ord) {
+                case ASC: {
+                    compar_ent_memb = compar_score_asc;
+                    break;
+                }
+                case DESC: {
+                    compar_ent_memb = compar_score_desc;
+                    break;
+                }
+                case NO_SORT_ORD: {
+                    return -1;
+                }
+            }
+            break;
+        }
+        case PROG: {
+            switch (sort_ord) {
+                case ASC: {
+                    compar_ent_memb = compar_prog_asc;
+                    break;
+                }
+                case DESC: {
+                    compar_ent_memb = compar_prog_desc;
+                    break;
+                }
+                case NO_SORT_ORD: {
+                    return -1;
+                }
+            }
+            break;
+        }
+        case NO_ENT_MEMB: {
+            return -1;
+        }
+    }
+    qsort(ents, ent_num, sizeof(ent *), compar_ent_memb);
+    return 0;
+}
+
+void free_ents(ent **ents, int ent_num) {
+    for (int i = 0; i < ent_num; ++i) {
+        free_ent(ents[i]);
+    }
+    free(ents);
+}
+
+ent **alloc_ents(int ent_num) {
     ent **ents = calloc(ent_num, sizeof(ent));
     for (int i = 0; i < ent_num; ++i) {
         ents[i] = alloc_ent();
         if (ents[i] == NULL) {
-            return -1;
+            free_ents(ents, i - 1);
+            return NULL;
         }
     }
-    if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
-        return -1;
-    }
-
+    return ents;
 }

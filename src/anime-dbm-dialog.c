@@ -143,55 +143,33 @@ int ent_dialog(char *dbname) {
                 puts("there are no entries in the database");
                 return 0;
             }
-            ent **ents = calloc(ent_num, sizeof(ent));
-            for (int i = 0; i < ent_num; ++i) {
-                ents[i] = alloc_ent();
-                if (ents[i] == NULL) {
-                    for (int j = 0; j < i; ++j) {
-                        free_ent(ents[j]);
-                    }
-                    free(ents);
-                    return -1;
-                }
+            ent **ents = alloc_ents(ent_num);
+            if (ents == NULL) {
+                return -1;
             }
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             char *ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", ent_title) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(ent_title);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, ent_title, ent_num)) == NULL) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(ent_title);
                 errno = EINVAL;
                 return -1;
             }
             if (printf_ent(chos_ent, ent_printf_toml) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(ent_title);
                 return -1;
             }
@@ -210,42 +188,26 @@ int ent_dialog(char *dbname) {
                 puts("there are no entries in the database");
                 return 0;
             }
-            ent **ents = calloc(ent_num, sizeof(ent));
-            for (int i = 0; i < ent_num; ++i) {
-                ents[i] = alloc_ent();
-                if (ents[i] == NULL) {
-                    for (int j = 0; j < i; ++j) {
-                        free_ent(ents[j]);
-                    }
-                    free(ents);
-                    return -1;
-                }
+            ent **ents = alloc_ents(ent_num);
+            if (ents == NULL) {
+                return -1;
             }
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             char *chosen_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(chosen_ent_title);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, chosen_ent_title, ent_num)) == NULL) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(chosen_ent_title);
                 errno = EINVAL;
                 return -1;
@@ -255,10 +217,7 @@ int ent_dialog(char *dbname) {
             switch (chos_ent_memb) {
                 case TITLE: {
                     if (get_ent_title(chos_ent) == -1) {
-                        for (int i = 0; i < ent_num; ++i) {
-                            free_ent(ents[i]);
-                        }
-                        free(ents);
+                        free_ents(ents, ent_num);
                         free(chosen_ent_title);
                         return -1;
                     }
@@ -266,10 +225,7 @@ int ent_dialog(char *dbname) {
                 }
                 case STATUS: {
                     if (get_ent_status(chos_ent) == -1) {
-                        for (int i = 0; i < ent_num; ++i) {
-                            free_ent(ents[i]);
-                        }
-                        free(ents);
+                        free_ents(ents, ent_num);
                         free(chosen_ent_title);
                         return -1;
                     }
@@ -277,10 +233,7 @@ int ent_dialog(char *dbname) {
                 }
                 case SCORE: {
                     if (get_ent_score(chos_ent) == -1) {
-                        for (int i = 0; i < ent_num; ++i) {
-                            free_ent(ents[i]);
-                        }
-                        free(ents);
+                        free_ents(ents, ent_num);
                         free(chosen_ent_title);
                         return -1;
                     }
@@ -288,38 +241,26 @@ int ent_dialog(char *dbname) {
                 }
                 case PROG: {
                     if (get_ent_prog(chos_ent) == -1) {
-                        for (int i = 0; i < ent_num; ++i) {
-                            free_ent(ents[i]);
-                        }
-                        free(ents);
+                        free_ents(ents, ent_num);
                         free(chosen_ent_title);
                         return -1;
                     }
                     break;
                 }
                 case NO_ENT_MEMB: {
-                    for (int i = 0; i < ent_num; ++i) {
-                        free_ent(ents[i]);
-                    }
-                    free(ents);
+                    free_ents(ents, ent_num);
                     free(chosen_ent_title);
                     return -1;
                 }
             }
             if (erase_db(dbname) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(chosen_ent_title);
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
                 if (append_ent(dbname, ents[i]) == -1) {
-                    for (int j = 0; j < ent_num; ++j) {
-                        free_ent(ents[j]);
-                    }
-                    free(ents);
+                    free_ents(ents, ent_num);
                     free(chosen_ent_title);
                     return -1;
                 }
@@ -340,64 +281,39 @@ int ent_dialog(char *dbname) {
                 puts("there are no entries in the database");
                 return 0;
             }
-            ent **ents = calloc(ent_num, sizeof(ent));
-            for (int i = 0; i < ent_num; ++i) {
-                ents[i] = alloc_ent();
-                if (ents[i] == NULL) {
-                    for (int j = 0; j < i; ++j) {
-                        free_ent(ents[j]);
-                    }
-                    free(ents);
-                    return -1;
-                }
+            ent **ents = alloc_ents(ent_num);
+            if (ents == NULL) {
+                return -1;
             }
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             char *chos_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chos_ent_title) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 return -1;
             }
             ent *chos_ent;
             if ((chos_ent = get_ent_w_match_title(ents, chos_ent_title, ent_num)) == NULL) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(chos_ent_title);
                 errno = EINVAL;
                 return -1;
             }
             if (erase_db(dbname) == -1) {
-                for (int i = 0; i < ent_num; ++i) {
-                    free_ent(ents[i]);
-                }
-                free(ents);
+                free_ents(ents, ent_num);
                 free(chos_ent_title);
                 return -1;
             }
             for (int i = 0; i < ent_num; ++i) {
                 if (ents[i] != chos_ent) {
                     if (append_ent(dbname, ents[i]) == -1) {
-                        for (int j = 0; j < ent_num; ++j) {
-                            free_ent(ents[j]);
-                        }
-                        free(ents);
+                        free_ents(ents, ent_num);
                         free(chos_ent_title);
                         return -1;
                     }
@@ -434,7 +350,6 @@ int db_dialog() {
             if (ls_db_cmnds() == -1) {
                 return -1;
             }
-
             return 0;
         }
         case NEW_DB: {
@@ -443,7 +358,6 @@ int db_dialog() {
             if (get_dbname(dbname) == -1) {
                 return -1;
             }
-
             // create database
             FILE *db = fopen(dbname, "wx");
             if (db == NULL) {
@@ -451,10 +365,8 @@ int db_dialog() {
             } else {
                 printf("database %s has been created\n", dbname);
             }
-
             fclose(db);
             free(dbname);
-
             return 0;
         }
         case OPEN_DB: {
@@ -466,18 +378,15 @@ int db_dialog() {
                 puts("there are no databases in the current directory");
                 return 0;
             }
-
             // get database name
             char *dbname = calloc(FILENAME_MAX, sizeof(char));
             if (get_dbname(dbname) == -1) {
                 return -1;
             }
-
             // check if database with such name exists
             if (access(dbname, F_OK) == -1) {
                 return -1;
             }
-
             // open database
             close_db_flag = 0;
             printf("database %s has been opened\n", dbname);
@@ -487,9 +396,7 @@ int db_dialog() {
                 }
             } while (close_db_flag != 1);
             printf("database %s has been closed\n", dbname);
-
             free(dbname);
-
             return 0;
         }
         case SORT_DB: {
@@ -501,27 +408,76 @@ int db_dialog() {
                 puts("there are no databases in the current directory");
                 return 0;
             }
-
             // get database name
             char *dbname = calloc(FILENAME_MAX, sizeof(char));
             if (get_dbname(dbname) == -1) {
+                free(dbname);
                 return -1;
             }
-
             // check if database with such name exists
             if (access(dbname, F_OK) == -1) {
+                free(dbname);
                 return -1;
             }
-
-            // TODO implement sorting databases
-            /*if (sort(dbname) == -1) {
+            // get number of entries
+            int ent_num = get_ent_num(dbname);
+            if (ent_num == -1) {
+                free(dbname);
                 return -1;
-            } else {
-                printf("database %s has been sorted", dbname);
-            }*/
-
+            } else if (ent_num == 0) {
+                puts("there are no entries in the database");
+                free(dbname);
+                return 0;
+            }
+            // allocate memory for an array of entries
+            ent **ents = alloc_ents(ent_num);
+            if (ents == NULL) {
+                return -1;
+            }
+            // scan database, store entries in the array
+            if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
+                free_ents(ents, ent_num);
+                free(dbname);
+                return -1;
+            }
+            // get chosen entry member
+            printf("%s", ent_memb_ls_toml);
+            enum ent_memb chos_ent_memb = get_ent_memb();
+            if (chos_ent_memb == NO_ENT_MEMB) {
+                free_ents(ents, ent_num);
+                free(dbname);
+                return -1;
+            }
+            // get sorting order
+            enum sort_ord chos_sort_ord = get_sort_ord();
+            if (chos_sort_ord == NO_SORT_ORD) {
+                free_ents(ents, ent_num);
+                free(dbname);
+                return -1;
+            }
+            // sort array of entries
+            if (sort_ents(ents, ent_num, chos_ent_memb, chos_sort_ord) == -1) {
+                free_ents(ents, ent_num);
+                free(dbname);
+                return -1;
+            }
+            // erase database
+            if (erase_db(dbname) == -1) {
+                free_ents(ents, ent_num);
+                free(dbname);
+                return -1;
+            }
+            // write sorted entries to database
+            for (int i = 0; i < ent_num; ++i) {
+                if (append_ent(dbname, ents[i]) == -1) {
+                    free_ents(ents, ent_num);
+                    free(dbname);
+                    return -1;
+                }
+            }
+            printf("database %s has been sorted", dbname);
+            free_ents(ents, ent_num);
             free(dbname);
-
             return 0;
         }
         case DEL_DB: {
@@ -533,32 +489,25 @@ int db_dialog() {
                 puts("there are no databases in the current directory");
                 return 0;
             }
-
             // get database name
             char *dbname = calloc(FILENAME_MAX, sizeof(char));
             if (get_dbname(dbname) == -1) {
                 return -1;
             }
-
             // check if database with such name exists
             if (access(dbname, F_OK) == -1) {
                 return -1;
             }
-
             // delete database
             if (remove(dbname) == -1) {
                 return -1;
-            } else {
-                printf("database %s has been deleted", dbname);
             }
-
+            printf("database %s has been deleted", dbname);
             free(dbname);
-
             return 0;
         }
         case CLOSE_DBM: {
             close_dbm_flag = 1;
-
             return 0;
         }
         case DB_NO_CMND: {
