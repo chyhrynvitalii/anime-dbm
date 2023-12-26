@@ -2,37 +2,49 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "anime-dbm-engine.h"
 #include "get.h"
 #include "maths.h"
 #include "str.h"
+#include "file.h"
+#include "anime-dbm-dialog.h"
 
-// database file extension
-const char *csvfext= ".csv";
+// constant file names
+const char *cur_dir = ".";
+const char *log_name = "anime-dbm.log";
 
-// length of entry keys
+// file extensions
+const char *csv_file_ext = ".csv";
+const char *log_file_ext = ".log";
+
+// length of database entry keys
 const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, ent_key_len = 8, sort_ord_len = 16;
 
 // domain of score
 const float score_low = 0, score_up = 10;
 
-// csv print format for database entries
-const char *ent_printf_csv = "\"%s\",\"%s\",%.2f,%u\n";
+// formats
+const char *db_ent_printf_csv = "\"%s\",\"%s\",%.2f,%u\n";
 
-const char *ent_printf_toml = "[%s]\n"
-                              "status = \"%s\"\n"
-                              "score = %.2f\n"
-                              "progress = %u\n";
+const char *db_ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
 
-const char *ent_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
+const char *db_ent_printf_toml = "[%s]\n"
+                                 "status = \"%s\"\n"
+                                 "score = %.2f\n"
+                                 "progress = %u\n";
 
-const char *title_printf_toml = "[%s]\n";
+const char *db_ent_title_printf_toml = "[%s]\n";
 
-const char *ent_key_ls_toml = "[title]\n"
-                               "status\n"
-                               "score\n"
-                               "progress\n";
+const char *db_ent_key_ls_toml = "[title]\n"
+                                 "status\n"
+                                 "score\n"
+                                 "progress\n";
+
+const char *log_ent_printf_csv = "\"%s\",%i,%i\n";
+
+const char *log_ent_scanf_csv = "\"%[^\"]\",%i,%i%*c";
 
 db_ent *alloc_db_ent() {
     db_ent *db_ent = calloc(1, sizeof(*db_ent));
@@ -98,10 +110,10 @@ int get_db_ent(db_ent *db_ent) {
 }
 
 int get_db_name(char *db_name_buf) {
-    printf("enter database name (must be a %s file): ", csvfext);
+    printf("enter database name (must be a %s file): ", csv_file_ext);
     if (get_str(FILENAME_MAX, NULL, db_name_buf) == -1) {
         return -1;
-    } else if (!ends_substr(db_name_buf, csvfext)) {
+    } else if (!ends_substr(db_name_buf, csv_file_ext)) {
         errno = EINVAL;
         return -1;
     }
@@ -114,7 +126,7 @@ int append_db_ent(char *db_name, db_ent *db_ent) {
     if (db == NULL) {
         return -1;
     }
-    if (fprintf(db, ent_printf_csv, db_ent->title, db_ent->status, db_ent->score, db_ent->prog) < 0) {
+    if (fprintf(db, db_ent_printf_csv, db_ent->title, db_ent->status, db_ent->score, db_ent->prog) < 0) {
         return -1;
     }
     if (fclose(db) == EOF) {
@@ -293,6 +305,17 @@ db_ent **alloc_db_ents(int ent_num) {
     return ents;
 }
 
+int new_log() {
+    // create database
+    FILE *db = fopen(log_name, "wx");
+    if (db == NULL) {
+        return -1;
+    }
+    return 0;
+}
+
+int log_sort_state();
+
 int scan_log(char *logname, const char *scan_format, log_ent **log_ents, int log_ent_num) {
     FILE *log = fopen(logname, "r");
     if (log == NULL) {
@@ -302,5 +325,44 @@ int scan_log(char *logname, const char *scan_format, log_ent **log_ents, int log
         fscanf(log, scan_format, log_ents[i]->db_name, &log_ents[i]->sort_ord, &log_ents[i]->ent_key);
     }
     fclose(log);
+    return 0;
+}
+
+int new_db(const char *db_name) {
+    FILE *db = fopen(db_name, "wx");
+    if (db == NULL) {
+        return -1;
+    } else {
+        fclose(db);
+        return 0;
+    }
+}
+
+int ls_dbs() {
+    int db_num = ls_select_dir_ent(cur_dir, select_csv);
+    if (db_num == -1) {
+        return -1;
+    } else if (db_num == 0) {
+        puts("there are no databases in the current directory");
+    }
+    return 0;
+}
+
+int open_db(const char *db_name) {
+    // check if database with the given name exists
+    if (access(db_name, F_OK) == -1) {
+        return -1;
+    }
+
+    // set state
+    close_db_flag = 0;
+
+    // call database entry dialog in a loop
+    do {
+        if (db_ent_dialog(db_name) == -1) {
+            perror("error");
+        }
+    } while (close_db_flag != 1);
+
     return 0;
 }

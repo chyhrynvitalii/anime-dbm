@@ -34,16 +34,17 @@ typedef struct {
     enum db_ent_key ent_key;
 } log_ent;
 
+// log file name
+extern const char *log_name;
+
 // length of database entry title
 extern const size_t title_len;
-// database entry print / scan formats
-extern const char *ent_printf_csv, *ent_printf_toml, *ent_scanf_csv, *title_printf_toml;
-// database entry key list format
-extern const char *ent_key_ls_toml;
 
-// get a database name
-// returns -1 on error, 0 on success
-int get_db_name(char *);
+// database entry print / scan formats
+extern const char *db_ent_printf_csv, *db_ent_printf_toml, *db_ent_scanf_csv, *db_ent_title_printf_toml;
+
+// database entry key list format
+extern const char *db_ent_key_ls_toml;
 
 // allocates memory for a database entry
 // returns NULL on error, pointer to an allocated entry on success
@@ -80,14 +81,14 @@ int append_db_ent(char *, db_ent *);
 // returns -1 on error, number of entries in database on success
 int get_db_ent_num(char *);
 
-// scans a database for a given number of database entries, store result in a database entry pointer
+// scans a database for the given number of database entries, store result in a database entry pointer
 // returns -1 on error, 0 on success
 int scan_db(char *, const char *, db_ent **, int);
 
-// prints out a database entry to stdin with a given format
+// prints out a database entry to stdin with the given format
 void printf_db_ent(db_ent *, const char *);
 
-// prints out titles of database entries to stdin with a given format
+// prints out titles of database entries to stdin with the given format
 void ls_titles(db_ent **, const char *, int );
 
 // searches through an array of database entry pointers for a matching title
@@ -116,3 +117,29 @@ void free_db_ents(db_ent **, int);
 // allocate an array of entries
 // returns NULL on error, pointer to an allocated array of entries on SUCCESS
 db_ent **alloc_db_ents(int);
+
+// DESCRIPTION
+//      lists databases in the current directory or tells that there are no databases
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int ls_dbs();
+
+// DESCRIPTION
+//      gets a database name, writes it to the given pointer
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int get_db_name(char *db_name);
+
+// DESCRIPTION
+//      creates a new database with the given name
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int new_db(const char *db_name);
+
+// DESCRIPTION
+//      if a database with the given name exists, sets close_db_flag to 0
+//      calls db_ent_dialog in a loop until close_db_flag is set to 1
+//      in case db_ent_dialog returns -1, calls perror
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int open_db(const char *db_name);

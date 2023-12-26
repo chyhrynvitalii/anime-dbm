@@ -6,7 +6,6 @@
 
 #include "anime-dbm-dialog.h"
 #include "anime-dbm-engine.h"
-#include "file.h"
 #include "get.h"
 
 const size_t cmnd_len = 6;
@@ -69,47 +68,33 @@ enum ent_cmnd get_ent_cmnd() {
     }
 }
 
-int ls_db_cmnds() {
-    if (puts("commands:\n"
-             "help\tlist commands\n"
-             "new\tnew database\n"
-             "open\topen database\n"
-             "sort\tsort database\n"
-             "delete\tdelete database\n"
-             "close\tclose application") == EOF) {
-        return -1;
-    } else {
-        return 0;
-    }
+void ls_db_cmnds() {
+    puts("commands:\n"
+         "help\tlist commands\n"
+         "new\tnew database\n"
+         "open\topen database\n"
+         "sort\tsort database\n"
+         "delete\tdelete database\n"
+         "close\tclose application");
 }
 
-int ls_ent_cmnds() {
-    if (puts("commands:\n"
-             "help\tlist commands\n"
-             "new\tnew entry\n"
-             "read\tread entry\n"
-             "edit\tedit entry\n"
-             "delete\tdelete entry\n"
-             "close\tclose database") == EOF) {
-        return -1;
-    } else {
-        return 0;
-    }
+void ls_db_ent_cmnds() {
+    puts("commands:\n"
+         "help\tlist commands\n"
+         "new\tnew entry\n"
+         "read\tread entry\n"
+         "edit\tedit entry\n"
+         "delete\tdelete entry\n"
+         "close\tclose database");
 }
 
 int db_ent_dialog(char *db_name) {
-    // get entry command
     enum ent_cmnd cmnd = get_ent_cmnd();
 
     switch (cmnd) {
         // TODO implement keeping sorting
         case DB_HELP: {
-            // list entry commands
-            if (ls_ent_cmnds() == -1) {
-                return -1;
-            }
-
-            return 0;
+            ls_db_ent_cmnds();
         }
         case NEW_ENT: {
             db_ent *ent = alloc_db_ent();
@@ -140,11 +125,11 @@ int db_ent_dialog(char *db_name) {
             if (ents == NULL) {
                 return -1;
             }
-            if (scan_db(db_name, ent_scanf_csv, ents, ent_num) == -1) {
+            if (scan_db(db_name, db_ent_scanf_csv, ents, ent_num) == -1) {
                 free_db_ents(ents, ent_num);
                 return -1;
             }
-            ls_titles(ents, title_printf_toml, ent_num);
+            ls_titles(ents, db_ent_title_printf_toml, ent_num);
             char *ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", ent_title) == -1) {
                 free_db_ents(ents, ent_num);
@@ -158,7 +143,7 @@ int db_ent_dialog(char *db_name) {
                 errno = EINVAL;
                 return -1;
             }
-            printf_db_ent(chos_ent, ent_printf_toml);
+            printf_db_ent(chos_ent, db_ent_printf_toml);
             for (int i = 0; i < ent_num; ++i) {
                 free_db_ent(ents[i]);
             }
@@ -178,10 +163,10 @@ int db_ent_dialog(char *db_name) {
             if (ents == NULL) {
                 return -1;
             }
-            if (scan_db(db_name, ent_scanf_csv, ents, ent_num) == -1) {
+            if (scan_db(db_name, db_ent_scanf_csv, ents, ent_num) == -1) {
                 return -1;
             }
-            ls_titles(ents, title_printf_toml, ent_num);
+            ls_titles(ents, db_ent_title_printf_toml, ent_num);
             char *chosen_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
                 free_db_ents(ents, ent_num);
@@ -195,7 +180,7 @@ int db_ent_dialog(char *db_name) {
                 errno = EINVAL;
                 return -1;
             }
-            printf("%s", ent_key_ls_toml);
+            printf("%s", db_ent_key_ls_toml);
             enum db_ent_key chos_ent_key = get_db_ent_key();
             switch (chos_ent_key) {
                 case TITLE: {
@@ -268,11 +253,11 @@ int db_ent_dialog(char *db_name) {
             if (ents == NULL) {
                 return -1;
             }
-            if (scan_db(db_name, ent_scanf_csv, ents, ent_num) == -1) {
+            if (scan_db(db_name, db_ent_scanf_csv, ents, ent_num) == -1) {
                 free_db_ents(ents, ent_num);
                 return -1;
             }
-            ls_titles(ents, title_printf_toml, ent_num);
+            ls_titles(ents, db_ent_title_printf_toml, ent_num);
             char *chos_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chos_ent_title) == -1) {
                 free_db_ents(ents, ent_num);
@@ -309,7 +294,6 @@ int db_ent_dialog(char *db_name) {
         }
         case CLOSE_DB: {
             close_db_flag = 1;
-
             return 0;
         }
         case ENT_NO_CMND: {
@@ -319,84 +303,64 @@ int db_ent_dialog(char *db_name) {
 }
 
 int db_dialog() {
-    // get db command
     enum db_cmnd cmnd = get_db_cmnd();
 
     switch (cmnd) {
         case DB_HELP: {
-            // list database commands
-            if (ls_db_cmnds() == -1) {
-                return -1;
-            }
-            return 0;
+            ls_db_cmnds();
         }
         case NEW_DB: {
-            // get database name
             char *db_name = calloc(FILENAME_MAX, sizeof(char));
             if (get_db_name(db_name) == -1) {
                 return -1;
             }
-            // create database
-            FILE *db = fopen(db_name, "wx");
-            if (db == NULL) {
+
+            if (new_db(db_name) == -1) {
+                free(db_name);
                 return -1;
             } else {
                 printf("database %s has been created\n", db_name);
+                free(db_name);
+                return 0;
             }
-            fclose(db);
-            free(db_name);
-            return 0;
         }
         case OPEN_DB: {
-            // list databases in current directory
-            int csv_ent_num = ls_select_dir_ent(".", select_csv);
-            if (csv_ent_num == -1) {
+            if (ls_dbs() == -1) {
                 return -1;
-            } else if (csv_ent_num == 0) {
-                puts("there are no databases in the current directory");
-                return 0;
             }
-            // get database name
+
             char *db_name = calloc(FILENAME_MAX, sizeof(char));
             if (get_db_name(db_name) == -1) {
                 return -1;
             }
-            // check if database with such name exists
-            if (access(db_name, F_OK) == -1) {
+
+            if (open_db(db_name) == -1) {
+                free(db_name);
                 return -1;
+            } else {
+                printf("database %s has been closed\n", db_name);
+                free(db_name);
             }
-            // open database
-            close_db_flag = 0;
-            printf("database %s has been opened\n", db_name);
-            do {
-                if (db_ent_dialog(db_name) == -1) {
-                    perror("error");
-                }
-            } while (close_db_flag != 1);
-            printf("database %s has been closed\n", db_name);
-            free(db_name);
-            return 0;
         }
         case SORT_DB: {
-            // list databases in current directory
-            int csv_ent_num = ls_select_dir_ent(".", select_csv);
-            if (csv_ent_num == -1) {
+            // TODO refactor this mess
+            if (ls_dbs() == -1) {
                 return -1;
-            } else if (csv_ent_num == 0) {
-                puts("there are no databases in the current directory");
-                return 0;
             }
+
             // get database name
             char *db_name = calloc(FILENAME_MAX, sizeof(char));
             if (get_db_name(db_name) == -1) {
                 free(db_name);
                 return -1;
             }
+
             // check if database with such name exists
             if (access(db_name, F_OK) == -1) {
                 free(db_name);
                 return -1;
             }
+
             // get number of entries
             int ent_num = get_db_ent_num(db_name);
             if (ent_num == -1) {
@@ -407,25 +371,29 @@ int db_dialog() {
                 free(db_name);
                 return 0;
             }
+
             // allocate memory for an array of entries
             db_ent **ents = alloc_db_ents(ent_num);
             if (ents == NULL) {
                 return -1;
             }
-            // scan database, store entries in the array
-            if (scan_db(db_name, ent_scanf_csv, ents, ent_num) == -1) {
+
+            // scan database, store entries in array
+            if (scan_db(db_name, db_ent_scanf_csv, ents, ent_num) == -1) {
                 free_db_ents(ents, ent_num);
                 free(db_name);
                 return -1;
             }
+
             // get chosen entry member
-            printf("%s", ent_key_ls_toml);
+            printf("%s", db_ent_key_ls_toml);
             enum db_ent_key chos_ent_key = get_db_ent_key();
             if (chos_ent_key == NO_ENT_KEY) {
                 free_db_ents(ents, ent_num);
                 free(db_name);
                 return -1;
             }
+
             // get sorting order
             enum db_sort_ord chos_sort_ord = get_sort_ord();
             if (chos_sort_ord == NO_SORT_ORD) {
@@ -433,14 +401,17 @@ int db_dialog() {
                 free(db_name);
                 return -1;
             }
+
             // sort array of entries
             sort_db_ents(ents, ent_num, chos_ent_key, chos_sort_ord);
+
             // erase database
             if (erase_db(db_name) == -1) {
                 free_db_ents(ents, ent_num);
                 free(db_name);
                 return -1;
             }
+
             // write sorted entries to database
             for (int i = 0; i < ent_num; ++i) {
                 if (append_db_ent(db_name, ents[i]) == -1) {
@@ -455,30 +426,23 @@ int db_dialog() {
             return 0;
         }
         case DEL_DB: {
-            // list databases in current directory
-            int csv_ent_num = ls_select_dir_ent(".", select_csv);
-            if (csv_ent_num == -1) {
+            if (ls_dbs() == -1) {
                 return -1;
-            } else if (csv_ent_num == 0) {
-                puts("there are no databases in the current directory");
-                return 0;
             }
-            // get database name
+
             char *db_name = calloc(FILENAME_MAX, sizeof(char));
             if (get_db_name(db_name) == -1) {
                 return -1;
             }
-            // check if database with such name exists
-            if (access(db_name, F_OK) == -1) {
-                return -1;
-            }
-            // delete database
+
             if (remove(db_name) == -1) {
+                free(db_name);
                 return -1;
+            } else {
+                printf("database %s has been deleted", db_name);
+                free(db_name);
+                return 0;
             }
-            printf("database %s has been deleted", db_name);
-            free(db_name);
-            return 0;
         }
         case CLOSE_DBM: {
             close_dbm_flag = 1;

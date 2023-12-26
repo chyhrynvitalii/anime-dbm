@@ -30,21 +30,17 @@ int close_db_flag;
 // is set by db_dialog
 int close_dbm_flag;
 
-// get database command
-// returns DB_NO_CMND on error, a database command from the list of database commands on success
-enum db_cmnd get_db_cmnd();
+// DESCRIPTION
+//      lists database commands
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+void ls_db_cmnds();
 
-// get entry command
-// returns ENT_NO_CMND on error, an entry command from the list of entry commands on success
-enum ent_cmnd get_ent_cmnd();
-
-// list database commands
-// returns -1 on error, 0 on success
-int ls_db_cmnds();
-
-// list entry commands
-// returns -1 on error, 0 on success
-int ls_ent_cmnds();
+// DESCRIPTION
+//      list database entry commands
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+void ls_db_ent_cmnds();
 
 // database dialog
 // returns -1 on error, 0 on success
@@ -52,4 +48,4 @@ int db_dialog();
 
 // entry dialog
 // returns -1 on error, 0 on success
-int db_ent_dialog(char *);
+int db_ent_dialog(char *db_name);
