@@ -267,79 +267,14 @@ int compar_prog_desc(const void *ent1, const void *ent2) {
     return compar_prog_asc(ent2, ent1);
 }
 
-int sort_ents(ent **ents, int ent_num, enum ent_memb ent_memb, enum sort_ord sort_ord) {
-    int (*compar_ent_memb)(const void *, const void*);
-    switch (ent_memb) {
-        case TITLE: {
-            switch (sort_ord) {
-                case ASC: {
-                    compar_ent_memb = compar_title_asc;
-                    break;
-                }
-                case DESC: {
-                    compar_ent_memb = compar_title_desc;
-                    break;
-                }
-                case NO_SORT_ORD: {
-                    return -1;
-                }
-            }
-            break;
-        }
-        case STATUS: {
-            switch (sort_ord) {
-                case ASC: {
-                    compar_ent_memb = compar_status_asc;
-                    break;
-                }
-                case DESC: {
-                    compar_ent_memb = compar_status_desc;
-                    break;
-                }
-                case NO_SORT_ORD: {
-                    return -1;
-                }
-            }
-            break;
-        }
-        case SCORE: {
-            switch (sort_ord) {
-                case ASC: {
-                    compar_ent_memb = compar_score_asc;
-                    break;
-                }
-                case DESC: {
-                    compar_ent_memb = compar_score_desc;
-                    break;
-                }
-                case NO_SORT_ORD: {
-                    return -1;
-                }
-            }
-            break;
-        }
-        case PROG: {
-            switch (sort_ord) {
-                case ASC: {
-                    compar_ent_memb = compar_prog_asc;
-                    break;
-                }
-                case DESC: {
-                    compar_ent_memb = compar_prog_desc;
-                    break;
-                }
-                case NO_SORT_ORD: {
-                    return -1;
-                }
-            }
-            break;
-        }
-        case NO_ENT_MEMB: {
-            return -1;
-        }
-    }
-    qsort(ents, ent_num, sizeof(ent *), compar_ent_memb);
-    return 0;
+int (*compar_ent_memb_lut[ent_memb_num][sort_ord_num])(const void *, const void *) =
+        {{compar_title_asc, compar_title_desc},
+         {compar_status_asc, compar_status_desc},
+         {compar_score_asc, compar_score_desc},
+         {compar_prog_asc, compar_prog_desc}};
+
+void sort_ents(ent **ents, int ent_num, enum ent_memb ent_memb, enum sort_ord sort_ord) {
+    qsort(ents, ent_num, sizeof(ent *), compar_ent_memb_lut[ent_memb][sort_ord]);
 }
 
 void free_ents(ent **ents, int ent_num) {

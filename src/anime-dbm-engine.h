@@ -1,19 +1,22 @@
 #pragma once
 
+#define ent_memb_num 4
+#define sort_ord_num 2
+
 // list of entry members
 enum ent_memb {
-    NO_ENT_MEMB,
     TITLE,
     STATUS,
     SCORE,
-    PROG
+    PROG,
+    NO_ENT_MEMB
 };
 
 // list of sorting order options
 enum sort_ord {
-    NO_SORT_ORD,
     ASC,
-    DESC
+    DESC,
+    NO_SORT_ORD
 };
 
 // entry structure
@@ -100,7 +103,7 @@ enum ent_memb get_ent_memb();
 
 // sorts an array of entries
 // returns -1 on error, 0 on success
-int sort_ents(ent **, int, enum ent_memb, enum sort_ord);
+void sort_ents(ent **, int, enum ent_memb, enum sort_ord);
 
 // free an array of entries
 void free_ents(ent **, int);
