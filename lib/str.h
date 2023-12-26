@@ -4,10 +4,10 @@
 bool has_char(char *, char);
 
 // returns true if a string ends with a character, otherwise returns false
-bool ends_w_char(char *, char);
+bool ends_char(char *, char);
 
 // returns true if a string ends with a substring, otherwise returns false
-bool ends_w_substr(char *, const char *);
+bool ends_substr(char *, const char *);
 
 // returns true if string is an integer, otherwise returns false
 bool is_int(char *);

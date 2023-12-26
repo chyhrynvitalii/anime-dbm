@@ -23,7 +23,7 @@ enum ent_cmnd {
 };
 
 // global variable that indicates if a command to close the database has been called
-// is set by ent_dialog
+// is set by db_ent_dialog
 int close_db_flag;
 
 // global variable that indicates if a command to close the application has been called
@@ -52,4 +52,4 @@ int db_dialog();
 
 // entry dialog
 // returns -1 on error, 0 on success
-int ent_dialog(char *);
+int db_ent_dialog(char *);

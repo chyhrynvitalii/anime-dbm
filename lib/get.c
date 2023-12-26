@@ -22,7 +22,7 @@ int get_int(size_t buf_len, const char *get_msg, int *int_buf) {
 
     fgets(buf, buf_pad(buf_len), stdin);
 
-    if (!ends_w_char(buf, '\n')) {
+    if (!ends_char(buf, '\n')) {
         free(buf);
         errno = EIO;
         clr_stdin();
@@ -47,7 +47,7 @@ int get_uint(size_t buf_len, const char *get_msg, unsigned *uint_buf) {
 
     fgets(buf, buf_pad(buf_len), stdin);
 
-    if (!ends_w_char(buf, '\n')) {
+    if (!ends_char(buf, '\n')) {
         free(buf);
         errno = EIO;
         clr_stdin();
@@ -72,7 +72,7 @@ int get_float(size_t buf_len, const char *get_msg, float *float_buf) {
 
     fgets(buf, buf_pad(buf_len), stdin);
 
-    if (!ends_w_char(buf, '\n')) {
+    if (!ends_char(buf, '\n')) {
         free(buf);
         errno = EIO;
         clr_stdin();
@@ -97,7 +97,7 @@ int get_double(size_t buf_len, const char *get_msg, double *double_buf) {
 
     fgets(buf, buf_pad(buf_len), stdin);
 
-    if (!ends_w_char(buf, '\n')) {
+    if (!ends_char(buf, '\n')) {
         free(buf);
         errno = EIO;
         clr_stdin();
@@ -120,7 +120,7 @@ int get_str(size_t buf_len, const char *get_msg, char *str_buf) {
 
     fgets(str_buf, buf_pad(buf_len), stdin);
 
-    if (!ends_w_char(str_buf, '\n')) {
+    if (!ends_char(str_buf, '\n')) {
         clr_stdin();
         errno = EIO;
         return -1;

@@ -11,11 +11,11 @@ bool has_char(char *str, const char c) {
     return strchr(str, c) != NULL;
 }
 
-bool ends_w_char(char *str, const char c) {
+bool ends_char(char *str, const char c) {
     return strrchr(str, c) == str + strlen(str) - 1;
 }
 
-bool ends_w_substr(char *str, const char *substr) {
+bool ends_substr(char *str, const char *substr) {
     char *endstr = str;
     while ((endstr = strstr(endstr, substr)) != NULL) {
         if (endstr[strlen(substr)] == '\0') {
