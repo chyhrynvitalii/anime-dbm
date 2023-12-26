@@ -78,12 +78,10 @@ int get_ent_num(char *);
 int scan_db(char *, const char *, ent **, int);
 
 // prints out an entry to stdin with a given format
-// returns -1 on error, 0 on success
-int printf_ent(ent *, const char *);
+void printf_ent(ent *, const char *);
 
 // prints out titles of entries to stdin with a given format
-// returns -1 on error, 0 on success
-int ls_titles(ent **, const char *, int );
+void ls_titles(ent **, const char *, int );
 
 // searches through an array of entry pointers for a matching title
 // returns a pointer to an entry with a matching title, NULL if no matches have been found

@@ -144,10 +144,7 @@ int ent_dialog(char *dbname) {
                 free_ents(ents, ent_num);
                 return -1;
             }
-            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                free_ents(ents, ent_num);
-                return -1;
-            }
+            ls_titles(ents, title_printf_toml, ent_num);
             char *ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", ent_title) == -1) {
                 free_ents(ents, ent_num);
@@ -161,11 +158,7 @@ int ent_dialog(char *dbname) {
                 errno = EINVAL;
                 return -1;
             }
-            if (printf_ent(chos_ent, ent_printf_toml) == -1) {
-                free_ents(ents, ent_num);
-                free(ent_title);
-                return -1;
-            }
+            printf_ent(chos_ent, ent_printf_toml);
             for (int i = 0; i < ent_num; ++i) {
                 free_ent(ents[i]);
             }
@@ -188,10 +181,7 @@ int ent_dialog(char *dbname) {
             if (scan_db(dbname, ent_scanf_csv, ents, ent_num) == -1) {
                 return -1;
             }
-            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                free_ents(ents, ent_num);
-                return -1;
-            }
+            ls_titles(ents, title_printf_toml, ent_num);
             char *chosen_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chosen_ent_title) == -1) {
                 free_ents(ents, ent_num);
@@ -282,10 +272,7 @@ int ent_dialog(char *dbname) {
                 free_ents(ents, ent_num);
                 return -1;
             }
-            if (ls_titles(ents, title_printf_toml, ent_num) == -1) {
-                free_ents(ents, ent_num);
-                return -1;
-            }
+            ls_titles(ents, title_printf_toml, ent_num);
             char *chos_ent_title = calloc(title_len, sizeof(char));
             if (get_str(title_len, "title: ", chos_ent_title) == -1) {
                 free_ents(ents, ent_num);
@@ -447,11 +434,7 @@ int db_dialog() {
                 return -1;
             }
             // sort array of entries
-            if (sort_ents(ents, ent_num, chos_ent_memb, chos_sort_ord) == -1) {
-                free_ents(ents, ent_num);
-                free(dbname);
-                return -1;
-            }
+            sort_ents(ents, ent_num, chos_ent_memb, chos_sort_ord);
             // erase database
             if (erase_db(dbname) == -1) {
                 free_ents(ents, ent_num);

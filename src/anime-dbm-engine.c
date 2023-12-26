@@ -30,7 +30,6 @@ const char *ent_memb_ls_toml = "[title]\n"
                                "score\n"
                                "progress\n";
 
-
 ent *alloc_ent() {
     ent *ent = calloc(1, sizeof(*ent));
     if ((ent->title = calloc(title_len, sizeof(char))) == NULL) {
@@ -146,20 +145,14 @@ int scan_db(char *dbname, const char *scan_format, ent **ent, int ent_num) {
     return 0;
 }
 
-int printf_ent(ent *ent, const char *print_format) {
-    if (printf(print_format, ent->title, ent->status, ent->score, ent->prog) < 0) {
-        return -1;
-    }
-    return 0;
+void printf_ent(ent *ent, const char *print_format) {
+    printf(print_format, ent->title, ent->status, ent->score, ent->prog);
 }
 
-int ls_titles(ent **ents, const char *print_format, int ent_num) {
+void ls_titles(ent **ents, const char *print_format, int ent_num) {
     for (int i = 0; i < ent_num; ++i) {
-        if (printf(print_format, ents[i]->title) < 0) {
-            return -1;
-        }
+        printf(print_format, ents[i]->title);
     }
-    return 0;
 }
 
 ent *get_ent_w_match_title(ent **ents, const char *title, int ent_num) {
