@@ -10,9 +10,6 @@ void clr_stdin() {
     for (char c; (c = getchar()) != '\n';);
 }
 
-// get standard data type values
-// if an error occurs the functions return -1 and set errno
-
 int get_int(size_t buf_len, const char *get_msg, int *int_buf) {
     char *buf = calloc(buf_pad(buf_len), sizeof(char));
 

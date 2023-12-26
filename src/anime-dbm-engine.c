@@ -79,7 +79,7 @@ int get_db_ent_status(db_ent *db_ent) {
 int get_db_ent_score(db_ent *db_ent) {
     if (get_float(score_len, "score: ", &db_ent->score) == -1) {
         return -1;
-    } else if (!in_closed_range(db_ent->score, score_low, score_up)) {
+    } else if (!in_closed_inter(db_ent->score, score_low, score_up)) {
         errno = EDOM;
         return -1;
     }
@@ -345,24 +345,5 @@ int ls_dbs() {
     } else if (db_num == 0) {
         puts("there are no databases in the current directory");
     }
-    return 0;
-}
-
-int open_db(const char *db_name) {
-    // check if database with the given name exists
-    if (access(db_name, F_OK) == -1) {
-        return -1;
-    }
-
-    // set state
-    close_db_flag = 0;
-
-    // call database entry dialog in a loop
-    do {
-        if (db_ent_dialog(db_name) == -1) {
-            perror("error");
-        }
-    } while (close_db_flag != 1);
-
     return 0;
 }

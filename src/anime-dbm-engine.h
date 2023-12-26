@@ -125,7 +125,7 @@ db_ent **alloc_db_ents(int);
 int ls_dbs();
 
 // DESCRIPTION
-//      gets database name, writes it to db_name
+//      gets database name, stores it in db_name
 // RETURN VALUES
 //      returns -1 on error, 0 on success
 int get_db_name(char *db_name);

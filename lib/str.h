@@ -1,22 +1,33 @@
 #pragma once
 
-// returns true if a string has a character, otherwise returns false
-bool has_char(char *, char);
+// DESCRIPTION
+//      returns true if str is whitespace
+bool is_whitespace(const char *str);
 
-// returns true if a string ends with a character, otherwise returns false
-bool ends_char(char *, char);
+// DESCRIPTION
+//      returns true if str has at least one occurrence of c
+bool has_char(const char *str, const char c);
 
-// returns true if a string ends with a substring, otherwise returns false
-bool ends_substr(char *, const char *);
+// DESCRIPTION
+//      returns true if str ends with c
+bool ends_char(const char *str, const char c);
 
-// returns true if string is an integer, otherwise returns false
-bool is_int(char *);
+// DESCRIPTION
+//      returns true if str ends with substr
+bool ends_substr(const char *str, const char *substr);
 
-// returns true if string is an unsigned integer, otherwise returns false
-bool is_uint(char *);
+// DESCRIPTION
+//      returns true if str is an int
+bool is_int(const char *str);
 
-// returns true if string is a floating point number, otherwise returns false
-bool is_float(char *);
+// DESCRIPTION
+//      returns true if str is a uint
+bool is_uint(const char *str);
 
-// returns true if string is a double precision floating point number, otherwise returns false
-bool is_double(char *);
+// DESCRIPTION
+//      returns true if str is a float
+bool is_float(const char *str);
+
+// DESCRIPTION
+//      returns true if str is a double
+bool is_double(const char *str);

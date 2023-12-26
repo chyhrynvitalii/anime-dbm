@@ -345,13 +345,21 @@ int db_dialog() {
                 return -1;
             }
 
-            if (open_db(db_name) == -1) {
+            if (access(db_name, F_OK) == -1) {
                 free(db_name);
                 return -1;
-            } else {
-                printf("database %s has been closed\n", db_name);
-                free(db_name);
             }
+
+            close_db_flag = 0;
+
+            do {
+                if (db_ent_dialog(db_name) == -1) {
+                    perror("error");
+                }
+            } while (close_db_flag != 1);
+
+            free(db_name);
+            return 0;
         }
         case SORT_DB: {
             // TODO refactor this mess
@@ -359,20 +367,17 @@ int db_dialog() {
                 return -1;
             }
 
-            // get database name
             char *db_name = calloc(FILENAME_MAX, sizeof(char));
             if (get_db_name(db_name) == -1) {
                 free(db_name);
                 return -1;
             }
 
-            // check if database with such name exists
             if (access(db_name, F_OK) == -1) {
                 free(db_name);
                 return -1;
             }
 
-            // get number of entries
             int ent_num = get_db_ent_num(db_name);
             if (ent_num == -1) {
                 free(db_name);
@@ -383,7 +388,6 @@ int db_dialog() {
                 return 0;
             }
 
-            // allocate memory for an array of entries
             db_ent **ents = alloc_db_ents(ent_num);
             if (ents == NULL) {
                 return -1;
