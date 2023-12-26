@@ -4,12 +4,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "anime-dbm-dialog.h"
+#include "anime-dbm-dialogs.h"
 #include "anime-dbm-engine.h"
 #include "get.h"
 
+// DESCRIPTION
+//      max length of a command
 const size_t cmnd_len = 6;
 
+// DESCRIPTION
+//      gets db_cmnd
+// RETURN VALUES
+//      returns DB_NO_CMND on error, an actual db_cmnd on success
 enum db_cmnd get_db_cmnd() {
     char *cmnd = calloc(cmnd_len, sizeof(char));
     get_str(cmnd_len, "\nenter command (help to list commands): ", cmnd);
@@ -39,7 +45,11 @@ enum db_cmnd get_db_cmnd() {
     }
 }
 
-enum ent_cmnd get_ent_cmnd() {
+// DESCRIPTION
+//      gets db_ent_cmnd
+// RETURN VALUES
+//      returns DB_ENT_NO_CMND on error, an actual db_ent_cmnd on success
+enum db_ent_cmnd get_ent_cmnd() {
     char *cmnd = calloc(cmnd_len, sizeof(char));
     get_str(cmnd_len, "\nenter command (help to list commands): ", cmnd);
 
@@ -64,7 +74,7 @@ enum ent_cmnd get_ent_cmnd() {
     } else {
         free(cmnd);
         errno = EINVAL;
-        return ENT_NO_CMND;
+        return DB_ENT_NO_CMND;
     }
 }
 
@@ -89,10 +99,11 @@ void ls_db_ent_cmnds() {
 }
 
 int db_ent_dialog(char *db_name) {
-    enum ent_cmnd cmnd = get_ent_cmnd();
+    enum db_ent_cmnd cmnd = get_ent_cmnd();
 
     switch (cmnd) {
         // TODO implement keeping sorting
+        // TODO refactor this mess as well
         case DB_HELP: {
             ls_db_ent_cmnds();
         }
@@ -296,7 +307,7 @@ int db_ent_dialog(char *db_name) {
             close_db_flag = 1;
             return 0;
         }
-        case ENT_NO_CMND: {
+        case DB_ENT_NO_CMND: {
             return -1;
         }
     }

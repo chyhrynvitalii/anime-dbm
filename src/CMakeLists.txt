@@ -1,7 +1,7 @@
 add_executable(anime-dbm
         anime-dbm.c
         anime-dbm-dialog.c
-        anime-dbm-dialog.h
+        anime-dbm-dialogs.h
         anime-dbm-engine.c
         anime-dbm-engine.h)
 

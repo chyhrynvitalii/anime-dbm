@@ -9,7 +9,7 @@
 #include "maths.h"
 #include "str.h"
 #include "file.h"
-#include "anime-dbm-dialog.h"
+#include "anime-dbm-dialogs.h"
 
 // constant file names
 const char *cur_dir = ".";

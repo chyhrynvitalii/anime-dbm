@@ -125,19 +125,19 @@ db_ent **alloc_db_ents(int);
 int ls_dbs();
 
 // DESCRIPTION
-//      gets a database name, writes it to the given pointer
+//      gets database name, writes it to db_name
 // RETURN VALUES
 //      returns -1 on error, 0 on success
 int get_db_name(char *db_name);
 
 // DESCRIPTION
-//      creates a new database with the given name
+//      creates a new database which name is pointed to by db_name
 // RETURN VALUES
 //      returns -1 on error, 0 on success
 int new_db(const char *db_name);
 
 // DESCRIPTION
-//      if a database with the given name exists, sets close_db_flag to 0
+//      if a database with a name pointed to by db_name exists, sets close_db_flag to 0
 //      calls db_ent_dialog in a loop until close_db_flag is set to 1
 //      in case db_ent_dialog returns -1, calls perror
 // RETURN VALUES
