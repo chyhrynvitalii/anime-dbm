@@ -35,6 +35,11 @@ typedef struct {
 extern const size_t title_len;
 
 // DESCRIPTION
+//      a lookup table of compar functions for qsort
+//      row is a rec_key and column is a sort_ord
+extern int (*compar_rec_key_lut[rec_key_num][sort_ord_num])(const void *, const void *);
+
+// DESCRIPTION
 //      allocates memory for a record structure
 //      returns a pointer to allocated memory
 rec *alloc_rec();
@@ -147,8 +152,3 @@ int edit_rec_key(rec *rec, enum rec_key rec_key);
 // ERRORS
 //      sets errno to EINVAL if input is not a sort_ord
 enum sort_ord get_sort_ord();
-
-// DESCRIPTION
-//      a lookup table of compar functions for qsort
-//      row is a rec_key and column is a sort_ord
-extern int (*compar_rec_key_lut[rec_key_num][sort_ord_num])(const void *, const void *);

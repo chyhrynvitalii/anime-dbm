@@ -7,8 +7,8 @@
 #include "anime-dbm-db.h"
 #include "anime-dbm-dialog.h"
 #include "anime-dbm-rec.h"
-#include "get.h"
 #include "file.h"
+#include "get.h"
 
 // DESCRIPTION
 //      max length of a command
@@ -84,6 +84,10 @@ enum rec_cmnd get_rec_cmnd() {
     }
 }
 
+// DESCRIPTION
+//      lists database commands
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 void ls_db_cmnds() {
     puts("commands:\n"
          "help\tlist commands\n"
@@ -93,6 +97,10 @@ void ls_db_cmnds() {
          "close\tclose application");
 }
 
+// DESCRIPTION
+//      list record commands
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 void ls_rec_cmnds() {
     puts("commands:\n"
          "help\tlist commands\n"
