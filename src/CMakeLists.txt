@@ -1,9 +1,11 @@
 add_executable(anime-dbm
-        anime-dbm.c
+        anime-dbm-db.c
+        anime-dbm-db.h
         anime-dbm-dialog.c
-        anime-dbm-dialogs.h
-        anime-dbm-engine.c
-        anime-dbm-engine.h)
+        anime-dbm-dialog.h
+        anime-dbm-rec.c
+        anime-dbm-rec.h
+        anime-dbm.c)
 
 target_link_libraries(anime-dbm PUBLIC
         file

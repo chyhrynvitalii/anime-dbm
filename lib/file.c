@@ -30,3 +30,19 @@ int ls_select_dir_ent(char *dir_name, int select(const struct dirent *)) {
     free(dir_ents);
     return csv_num;
 }
+
+int get_rec_num_csv(const char *csv_name) {
+    FILE *db = fopen(csv_name, "r");
+    if (db == NULL) {
+        return -1;
+    }
+
+    int ent_num = 0;
+    while (feof(db) == 0) {
+        if (getc(db) == '\n') {
+            ent_num++;
+        }
+    }
+
+    return ent_num;
+}
