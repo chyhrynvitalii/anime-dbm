@@ -11,7 +11,9 @@
 #include "get.h"
 
 // initializing close flags
+
 int close_db_flag = 0;
+
 int close_dbm_flag = 0;
 
 // DESCRIPTION
