@@ -26,7 +26,13 @@ int new_db();
 int open_db();
 
 // DESCRIPTION
-//      gets the database name and deletes the database with that name
+//      gets the database name and sorts it
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int sort_db();
+
+// DESCRIPTION
+//      gets the database name and deletes it
 // RETURN VALUES
 //      returns -1 on error, 0 on success
 int delete_db();

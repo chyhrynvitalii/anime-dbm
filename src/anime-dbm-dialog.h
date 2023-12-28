@@ -7,6 +7,7 @@ enum db_cmnd {
     DB_HELP,
     NEW_DB,
     OPEN_DB,
+    SORT_DB,
     DEL_DB,
     CLOSE_DBM,
 };
@@ -20,7 +21,6 @@ enum rec_cmnd {
     READ_REC,
     EDIT_REC,
     DEL_REC,
-    SORT_DB,
     CLOSE_DB
 };
 
