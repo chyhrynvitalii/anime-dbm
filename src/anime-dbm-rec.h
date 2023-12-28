@@ -1,8 +1,5 @@
 #pragma once
 
-#define rec_key_num 4
-#define sort_ord_num 2
-
 // DESCRIPTION
 //      enumerated list of record keys
 enum rec_key {
@@ -33,11 +30,6 @@ typedef struct {
 // DESCRIPTION
 //      record title length
 extern const size_t title_len;
-
-// DESCRIPTION
-//      a lookup table of compar functions for qsort
-//      row is a rec_key and column is a sort_ord
-extern int (*compar_rec_key_lut[rec_key_num][sort_ord_num])(const void *, const void *);
 
 // DESCRIPTION
 //      allocates memory for a record structure
@@ -128,7 +120,7 @@ rec *get_match_title_rec(rec **recs, const char *rec_title, int rec_num);
 rec *get_target_rec(rec **recs, int rec_num);
 
 // DESCRIPTION
-//      prints out a record pointed to by rec to stdin as toml
+//      prints out a record pointed to by rec to stdout as toml
 void put_rec(rec *rec);
 
 // DESCRIPTION
@@ -152,3 +144,30 @@ int edit_rec_key(rec *rec, enum rec_key rec_key);
 // ERRORS
 //      sets errno to EINVAL if input is not a sort_ord
 enum sort_ord get_sort_ord();
+
+// DESCRIPTION
+//      gets a new record and stores it in the database db_name
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int new_rec(char *db_name);
+
+// DESCRIPTION
+//      gets the title of a record from the database db_name
+//      then outputs the corresponding record to stdout as toml
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int read_rec(char *db_name);
+
+// DESCRIPTION
+//      gets the title of a record from the database db_name
+//      then gets the record key to edit, its new value and stores the edited record in the database
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int edit_rec(char *db_name);
+
+// DESCRIPTION
+//      gets the title of a record from the database db_name
+//      then deletes the corresponding record from the database
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int del_rec(char *db_name);

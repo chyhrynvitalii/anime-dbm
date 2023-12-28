@@ -6,8 +6,19 @@
 #include "anime-dbm-db.h"
 #include "anime-dbm-dialog.h"
 #include "anime-dbm-rec.h"
-#include "file.h"
 #include "get.h"
+
+// DESCRIPTION
+//      number of database commands
+#define db_cmnd_num     6
+
+// DESCRIPTION
+//      number of record commands
+#define rec_cmnd_num    6
+
+// DESCRIPTION
+//      max length of a command
+const size_t cmnd_len = 6;
 
 // initializing close flags
 
@@ -16,13 +27,9 @@ int close_db_flag = 0;
 int close_dbm_flag = 0;
 
 // DESCRIPTION
-//      max length of a command
-const size_t cmnd_len = 6;
-
-// DESCRIPTION
 //      gets db_cmnd
 // RETURN VALUES
-//      returns DB_NO_CMND on error, an actual db_cmnd on success
+//      returns NO_DB_CMND on error, an actual db_cmnd on success
 // ERRORS
 //      sets errno to EINVAL if input is not a db_cmnd
 enum db_cmnd get_db_cmnd() {
@@ -50,14 +57,14 @@ enum db_cmnd get_db_cmnd() {
     } else {
         free(cmnd);
         errno = EINVAL;
-        return DB_NO_CMND;
+        return NO_DB_CMND;
     }
 }
 
 // DESCRIPTION
 //      gets rec_cmnd
 // RETURN VALUES
-//      returns REC_NO_CMND on error, an actual rec_cmnd on success
+//      returns NO_REC_CMND on error, an actual rec_cmnd on success
 // ERRORS
 //      sets errno to EINVAL if input is not a rec_cmnd
 enum rec_cmnd get_rec_cmnd() {
@@ -85,15 +92,15 @@ enum rec_cmnd get_rec_cmnd() {
     } else {
         free(cmnd);
         errno = EINVAL;
-        return REC_NO_CMND;
+        return NO_REC_CMND;
     }
 }
 
 // DESCRIPTION
 //      lists database commands
 // RETURN VALUES
-//      returns -1 on error, 0 on success
-void ls_db_cmnds() {
+//      returns 0 on success
+int ls_db_cmnds() {
     puts("commands:\n"
          "help\tlist commands\n"
          "new\tnew database\n"
@@ -101,13 +108,14 @@ void ls_db_cmnds() {
          "sort\tsort database\n"
          "delete\tdelete database\n"
          "close\tclose application");
+    return 0;
 }
 
 // DESCRIPTION
 //      list record commands
 // RETURN VALUES
-//      returns -1 on error, 0 on success
-void ls_rec_cmnds() {
+//      returns 0 on success
+int ls_rec_cmnds(char *) {
     puts("commands:\n"
          "help\tlist commands\n"
          "new\tnew record\n"
@@ -115,186 +123,57 @@ void ls_rec_cmnds() {
          "edit\tedit record\n"
          "delete\tdelete record\n"
          "close\tclose database");
+    return 0;
 }
+
+// DESCRIPTION
+//      sets close_db_flag to 1
+int close_db(char *) {
+    close_db_flag = 1;
+    return 0;
+}
+
+// DESCRIPTION
+//      a lookup table for record commands
+//      index of a command corresponds to rec_cmnd enumeration
+int (*rec_cmnds[rec_cmnd_num])(char *db_name) = {ls_rec_cmnds,
+                                                 new_rec,
+                                                 read_rec,
+                                                 edit_rec,
+                                                 del_rec,
+                                                 close_db};
 
 int db_rec_dialog(char *db_name) {
     enum rec_cmnd cmnd = get_rec_cmnd();
-
-    switch (cmnd) {
-        // TODO implement keeping sorting
-        case DB_HELP: {
-            ls_rec_cmnds();
-        }
-        case NEW_REC: {
-            rec *rec = alloc_rec();
-
-            if (get_rec(rec) == -1) {
-                free_rec(rec);
-                return -1;
-            }
-
-            if (append_rec(db_name, rec) == -1) {
-                return -1;
-            } else {
-                printf("record %s has been created\n", rec->title);
-                free_rec(rec);
-                return 0;
-            }
-        }
-        case READ_REC: {
-            int rec_num = get_rec_num_csv(db_name);
-            if (rec_num == -1) {
-                return -1;
-            } else if (rec_num == 0) {
-                puts("there are no records in the database");
-                return 0;
-            }
-
-            rec **recs = alloc_recs(rec_num);
-            if (scan_recs(db_name, recs, rec_num) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            rec *target_rec = get_target_rec(recs, rec_num);
-            if (target_rec == NULL) {
-                free_recs(recs, rec_num);
-                return -1;
-            } else {
-                put_rec(target_rec);
-                free_recs(recs, rec_num);
-                return 0;
-            }
-        }
-        case EDIT_REC: {
-            int rec_num = get_rec_num_csv(db_name);
-            if (rec_num == -1) {
-                return -1;
-            } else if (rec_num == 0) {
-                puts("there are no records in the database");
-                return 0;
-            }
-
-            rec **recs = alloc_recs(rec_num);
-            if (scan_recs(db_name, recs, rec_num) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            rec *target_rec = get_target_rec(recs, rec_num);
-            if (target_rec == NULL) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            enum rec_key rec_key = get_rec_key();
-            if (rec_key == NO_REC_KEY) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            if (edit_rec_key(target_rec, rec_key) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            if (write_recs(db_name, recs, rec_num) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            } else {
-                printf("the record %s has been edited\n", target_rec->title);
-                free_recs(recs, rec_num);
-                return 0;
-            }
-        }
-        case DEL_REC: {
-            int rec_num = get_rec_num_csv(db_name);
-            if (rec_num == -1) {
-                return -1;
-            } else if (rec_num == 0) {
-                puts("there are no records in the database");
-                return 0;
-            }
-
-            rec **recs = alloc_recs(rec_num);
-            if (scan_recs(db_name, recs, rec_num) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            rec *target_rec = get_target_rec(recs, rec_num);
-            if (target_rec == NULL) {
-                free_recs(recs, rec_num);
-                return -1;
-            }
-
-            for (int i = 0; i < rec_num; i++) {
-                if (target_rec == recs[i]) {
-                    free_rec(recs[i]);
-                    recs[i] = NULL;
-                }
-            }
-
-            if (write_recs(db_name, recs, rec_num) == -1) {
-                free_recs(recs, rec_num);
-                return -1;
-            } else {
-                puts("the record has been deleted");
-                free_recs(recs, rec_num);
-                return 0;
-            }
-        }
-        case CLOSE_DB: {
-            close_db_flag = 1;
-            return 0;
-        }
-        case REC_NO_CMND: {
-            return -1;
-        }
+    if (cmnd == NO_REC_CMND) {
+        return -1;
+    } else {
+        return rec_cmnds[cmnd](db_name);
     }
 }
 
+// DESCRIPTION
+//      sets close_dbm_flag to 1
+int close_dbm() {
+    close_dbm_flag = 1;
+    return 0;
+}
+
+// DESCRIPTION
+//      a lookup table for database commands
+//      index of a command corresponds to db_cmnd enumeration
+int (*db_cmnds[db_cmnd_num])() = {ls_db_cmnds,
+                                  new_db,
+                                  open_db,
+                                  sort_db,
+                                  del_db,
+                                  close_dbm};
+
 int db_dialog() {
     enum db_cmnd cmnd = get_db_cmnd();
-
-    switch (cmnd) {
-        case DB_HELP: {
-            ls_db_cmnds();
-        }
-        case NEW_DB: {
-            if (new_db() == -1) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-        case OPEN_DB: {
-            if (open_db() == -1) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-        case SORT_DB: {
-            if (sort_db() == -1) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-        case DEL_DB: {
-            if (delete_db()) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-        case CLOSE_DBM: {
-            close_dbm_flag = 1;
-            return 0;
-        }
-        case DB_NO_CMND: {
-            return -1;
-        }
+    if (cmnd == NO_DB_CMND) {
+        return -1;
+    } else {
+        return db_cmnds[cmnd]();
     }
 }

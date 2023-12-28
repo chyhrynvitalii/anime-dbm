@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "anime-dbm-rec.h"
+#include "file.h"
 #include "get.h"
 #include "maths.h"
 
@@ -248,40 +249,125 @@ enum sort_ord get_sort_ord() {
     }
 }
 
-int compar_title_asc(const void *rec1, const void *rec2) {
-    return strcmp((*(rec **)rec1)->title, (*(rec **)rec2)->title);
+int new_rec(char *db_name) {
+    rec *rec = alloc_rec();
+
+    if (get_rec(rec) == -1) {
+        free_rec(rec);
+        return -1;
+    }
+
+    if (append_rec(db_name, rec) == -1) {
+        return -1;
+    } else {
+        printf("record %s has been created\n", rec->title);
+        free_rec(rec);
+        return 0;
+    }
 }
 
-int compar_status_asc(const void *rec1, const void *rec2) {
-    return strcmp((*(rec **)rec1)->status, (*(rec **)rec2)->status);
+int read_rec(char *db_name) {
+    int rec_num = get_rec_num_csv(db_name);
+    if (rec_num == -1) {
+        return -1;
+    } else if (rec_num == 0) {
+        puts("there are no records in the database");
+        return 0;
+    }
+
+    rec **recs = alloc_recs(rec_num);
+    if (scan_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    rec *target_rec = get_target_rec(recs, rec_num);
+    if (target_rec == NULL) {
+        free_recs(recs, rec_num);
+        return -1;
+    } else {
+        put_rec(target_rec);
+        free_recs(recs, rec_num);
+        return 0;
+    }
 }
 
-int compar_score_asc(const void *rec1, const void *rec2) {
-    return (*(rec **)rec1)->score > (*(rec **)rec2)->score ? 1 : -1;
+int edit_rec(char *db_name) {
+    int rec_num = get_rec_num_csv(db_name);
+    if (rec_num == -1) {
+        return -1;
+    } else if (rec_num == 0) {
+        puts("there are no records in the database");
+        return 0;
+    }
+
+    rec **recs = alloc_recs(rec_num);
+    if (scan_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    rec *target_rec = get_target_rec(recs, rec_num);
+    if (target_rec == NULL) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    enum rec_key rec_key = get_rec_key();
+    if (rec_key == NO_REC_KEY) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    if (edit_rec_key(target_rec, rec_key) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    if (write_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    } else {
+        printf("the record %s has been edited\n", target_rec->title);
+        free_recs(recs, rec_num);
+        return 0;
+    }
 }
 
-int compar_prog_asc(const void *rec1, const void *rec2) {
-    return (int)((*(rec **)rec1)->prog - (*(rec **)rec2)->prog);
-}
+int del_rec(char *db_name) {
+    int rec_num = get_rec_num_csv(db_name);
+    if (rec_num == -1) {
+        return -1;
+    } else if (rec_num == 0) {
+        puts("there are no records in the database");
+        return 0;
+    }
 
-int compar_title_desc(const void *rec1, const void *rec2) {
-    return compar_title_asc(rec2, rec1);
-}
+    rec **recs = alloc_recs(rec_num);
+    if (scan_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
 
-int compar_status_desc(const void *rec1, const void *rec2) {
-    return compar_status_asc(rec2, rec1);
-}
+    rec *target_rec = get_target_rec(recs, rec_num);
+    if (target_rec == NULL) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
 
-int compar_score_desc(const void *rec1, const void *rec2) {
-    return compar_score_asc(rec2, rec1);
-}
+    for (int i = 0; i < rec_num; i++) {
+        if (target_rec == recs[i]) {
+            free_rec(recs[i]);
+            recs[i] = NULL;
+        }
+    }
 
-int compar_prog_desc(const void *rec1, const void *rec2) {
-    return compar_prog_asc(rec2, rec1);
+    if (write_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    } else {
+        puts("the record has been deleted");
+        free_recs(recs, rec_num);
+        return 0;
+    }
 }
-
-int (*compar_rec_key_lut[rec_key_num][sort_ord_num])(const void *, const void *) =
-        {{compar_title_asc, compar_title_desc},
-         {compar_status_asc, compar_status_desc},
-         {compar_score_asc, compar_score_desc},
-         {compar_prog_asc, compar_prog_desc}};

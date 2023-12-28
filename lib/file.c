@@ -9,7 +9,7 @@ int select_csv(const struct dirent *dir_ent) {
     return ends_substr(dir_ent->d_name, ".csv");
 }
 
-int ls_select_dir_ent(char *dir_name, int select(const struct dirent *)) {
+int ls_select_dir_ent(const char *dir_name, int select(const struct dirent *)) {
     DIR *dir = opendir(dir_name);
     if (dir == NULL) {
         return -1;

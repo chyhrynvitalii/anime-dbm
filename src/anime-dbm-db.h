@@ -1,18 +1,6 @@
 #pragma once
 
 // DESCRIPTION
-//      lists databases in the current directory or tells that there are no databases
-// RETURN VALUES
-//      returns number of databases listed
-int ls_dbs();
-
-// DESCRIPTION
-//      gets database name, stores it in db_name
-// RETURN VALUES
-//      returns -1 on error, 0 on success
-int get_db_name(char *db_name);
-
-// DESCRIPTION
 //      gets a database name and creates a new database with that name
 // RETURN VALUES
 //      returns -1 on error, 0 on success
@@ -35,4 +23,4 @@ int sort_db();
 //      gets the database name and deletes it
 // RETURN VALUES
 //      returns -1 on error, 0 on success
-int delete_db();
+int del_db();

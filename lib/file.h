@@ -13,7 +13,7 @@ int select_csv(const struct dirent *dir_ent);
 //      lists dir_name directory entries filtered by the select function which is fed to scandir
 // RETURN VALUES
 //      returns -1 on error, number of directory entries listed on success
-int ls_select_dir_ent(char *dir_name, int (*select)(const struct dirent *));
+int ls_select_dir_ent(const char *dir_name, int (*select)(const struct dirent *));
 
 // DESCRIPTION
 //      calculates number of records in a csv file

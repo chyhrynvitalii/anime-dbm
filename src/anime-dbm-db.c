@@ -5,6 +5,7 @@
 #include "anime-dbm-db.h"
 #include "anime-dbm-dialog.h"
 #include "anime-dbm-rec.h"
+#include "anime-dbm-sort.h"
 #include "file.h"
 #include "get.h"
 #include "str.h"
@@ -17,6 +18,10 @@ const char *cur_dir = ".";
 //      csv file extension
 const char *csv_file_ext = ".csv";
 
+// DESCRIPTION
+//      lists databases in the current directory or tells that there are no databases
+// RETURN VALUES
+//      returns number of databases listed
 int ls_dbs() {
     int db_num = ls_select_dir_ent(cur_dir, select_csv);
     if (db_num == 0) {
@@ -25,6 +30,10 @@ int ls_dbs() {
     return db_num;
 }
 
+// DESCRIPTION
+//      gets database name, stores it in db_name_buf
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_db_name(char *db_name_buf) {
     printf("enter database name (must be a %s file): ", csv_file_ext);
     if (get_str(FILENAME_MAX, NULL, db_name_buf) == -1) {
@@ -137,7 +146,7 @@ int sort_db() {
     }
 }
 
-int delete_db() {
+int del_db() {
     if (ls_dbs() == 0) {
         return 0;
     }
