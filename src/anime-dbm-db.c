@@ -132,7 +132,7 @@ int sort_db() {
         return -1;
     }
 
-    qsort(recs, rec_num, sizeof(rec *), compar_rec_key_lut[rec_key][sort_ord]);
+    qsort(recs, rec_num, sizeof(rec *), rec_key_compars[rec_key][sort_ord]);
 
     if (write_recs(db_name, recs, rec_num) == -1) {
         free(db_name);

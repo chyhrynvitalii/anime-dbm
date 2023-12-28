@@ -17,7 +17,7 @@
 #define rec_cmnd_num    6
 
 // DESCRIPTION
-//      max length of a command
+//      max length of a command as a string
 const size_t cmnd_len = 6;
 
 // initializing close flags
@@ -135,13 +135,13 @@ int close_db(char *) {
 
 // DESCRIPTION
 //      a lookup table for record commands
-//      index of a command corresponds to rec_cmnd enumeration
-int (*rec_cmnds[rec_cmnd_num])(char *db_name) = {ls_rec_cmnds,
-                                                 new_rec,
-                                                 read_rec,
-                                                 edit_rec,
-                                                 del_rec,
-                                                 close_db};
+//      index is mapped to enum rec_cmnd
+int (*rec_cmnds[rec_cmnd_num])(char *) = {ls_rec_cmnds,
+                                          new_rec,
+                                          read_rec,
+                                          edit_rec,
+                                          del_rec,
+                                          close_db};
 
 int db_rec_dialog(char *db_name) {
     enum rec_cmnd cmnd = get_rec_cmnd();
@@ -161,7 +161,7 @@ int close_dbm() {
 
 // DESCRIPTION
 //      a lookup table for database commands
-//      index of a command corresponds to db_cmnd enumeration
+//      index is mapped to enum db_cmnd
 int (*db_cmnds[db_cmnd_num])() = {ls_db_cmnds,
                                   new_db,
                                   open_db,

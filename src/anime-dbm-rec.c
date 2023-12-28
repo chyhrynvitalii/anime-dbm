@@ -8,25 +8,35 @@
 #include "get.h"
 #include "maths.h"
 
+// DESCRIPTION
+//      max length of a record key as a string
+const size_t rec_key_len = 8;
 
-// length of database record keys
-const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4, rec_key_len = 8, sort_ord_len = 16;
+// DESCRIPTION
+//      max length of a record value as a string
+const size_t title_len = 128, status_len = 16, score_len = 4, prog_len = 4;
 
-// domain of score
+// DESCRIPTION
+//      domain of score
 const float score_low = 0, score_up = 10;
 
 // DESCRIPTION
-//      record print and scan csv formats
+//      record csv print format
 const char *rec_printf_csv = "\"%s\",\"%s\",%.2f,%u\n";
+
+// DESCRIPTION
+//      record csv scan format
 const char *rec_scanf_csv = "\"%[^\"]\",\"%[^\"]\",%f,%u%*c";
 
 // DESCRIPTION
-//     record print toml format
+//     record toml print format
 const char *rec_printf_toml = "[%s]\n"
                               "status = %s\n"
                               "score = %.2f\n"
                               "progress = %u\n";
 
+// DESCRIPTION
+//      returns a pointer to memory allocated for a record
 rec *alloc_rec() {
     rec *rec = calloc(1, sizeof(*rec));
     rec->title = calloc(title_len, sizeof(char));
@@ -34,12 +44,16 @@ rec *alloc_rec() {
     return rec;
 }
 
+// DESCRIPTION
+//      deallocates memory allocated for a record pointed to by rec
 void free_rec(rec *rec) {
     free(rec->title);
     free(rec->status);
     free(rec);
 }
 
+// DESCRIPTION
+//      returns a pointer to memory allocated for rec_num record pointers
 rec **alloc_recs(int rec_num) {
     rec **recs = calloc(rec_num, sizeof(rec));
     for (int i = 0; i < rec_num; ++i) {
@@ -48,6 +62,8 @@ rec **alloc_recs(int rec_num) {
     return recs;
 }
 
+// DESCRIPTION
+//      deallocates memory allocated for rec_num record pointers pointed to by recs
 void free_recs(rec **recs, int rec_num) {
     for (int i = 0; i < rec_num; ++i) {
         free_rec(recs[i]);
@@ -55,6 +71,10 @@ void free_recs(rec **recs, int rec_num) {
     free(recs);
 }
 
+// DESCRIPTION
+//      gets a title, stores it in rec
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_rec_title(rec *rec) {
     if (get_str(title_len, "title: ", rec->title) == -1) {
         return -1;
@@ -62,6 +82,10 @@ int get_rec_title(rec *rec) {
     return 0;
 }
 
+// DESCRIPTION
+//      gets status, stores it in rec
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_rec_status(rec *rec) {
     if (get_str(status_len, "status: ", rec->status) == -1) {
         return -1;
@@ -69,6 +93,12 @@ int get_rec_status(rec *rec) {
     return 0;
 }
 
+// DESCRIPTION
+//      gets score, stores it in rec
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+// ERRORS
+//      sets errno to EDOM if input does not belong to the domain of score
 int get_rec_score(rec *rec) {
     if (get_float(score_len, "score: ", &rec->score) == -1) {
         return -1;
@@ -79,6 +109,10 @@ int get_rec_score(rec *rec) {
     return 0;
 }
 
+// DESCRIPTION
+//      gets progress, stores it in rec
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_rec_prog(rec *rec) {
     if (get_uint(prog_len, "progress: ", &rec->prog) == -1) {
         return -1;
@@ -86,6 +120,10 @@ int get_rec_prog(rec *rec) {
     return 0;
 }
 
+// DESCRIPTION
+//      gets a record, stores it in rec
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_rec(rec *rec) {
     if (get_rec_title(rec) == -1) {
         return -1;
@@ -102,6 +140,10 @@ int get_rec(rec *rec) {
     return 0;
 }
 
+// DESCRIPTION
+//      appends a record pointer to by rec to a database db_name
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int append_rec(const char *db_name, rec *rec) {
     FILE *db = fopen(db_name, "a");
     if (db == NULL) {
@@ -113,6 +155,10 @@ int append_rec(const char *db_name, rec *rec) {
     }
 }
 
+// DESCRIPTION
+//      writes rec_num records pointed to by recs to database db_name
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int write_recs(const char *db_name, rec **recs, int rec_num) {
     FILE *db = fopen(db_name, "w");
     if (db == NULL) {
@@ -127,6 +173,10 @@ int write_recs(const char *db_name, rec **recs, int rec_num) {
     return 0;
 }
 
+// DESCRIPTION
+//      scans database db_name for rec_num records, stores scanned records in recs
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int scan_recs(char *db_name, rec **recs, int rec_num) {
     FILE *db = fopen(db_name, "r");
     if (db == NULL) {
@@ -139,12 +189,18 @@ int scan_recs(char *db_name, rec **recs, int rec_num) {
     return 0;
 }
 
+// DESCRIPTION
+//      lists titles of rec_num records pointed to by recs
 void ls_rec_titles(rec **recs, int rec_num) {
     for (int i = 0; i < rec_num; ++i) {
         puts(recs[i]->title);
     }
 }
 
+// DESCRIPTION
+//      gets title of a record as a string, stores it in rec_title_buf
+// RETURN VALUES
+//      returns -1 on error, 0 on success
 int get_rec_title_str(char *rec_title_buf) {
     if (get_str(title_len, "title: ", rec_title_buf) == -1) {
         return -1;
@@ -153,6 +209,10 @@ int get_rec_title_str(char *rec_title_buf) {
     }
 }
 
+// DESCRIPTION
+//      gets a record from rec_num records pointed to by recs with the same title as rec_title
+// RETURN VALUES
+//      returns the matching record or NULL if a matching record has not been found
 rec *get_match_title_rec(rec **recs, const char *rec_title, int rec_num) {
     for (int i = 0; i < rec_num; ++i) {
         if (strcmp(recs[i]->title, rec_title) == 0) {
@@ -162,6 +222,14 @@ rec *get_match_title_rec(rec **recs, const char *rec_title, int rec_num) {
     return NULL;
 }
 
+// DESCRIPTION
+//      gets the record title as a string and finds the record with the same name from rec_num records pointed to by
+//      recs
+// RETURN VALUES
+//      returns the record with the same title as the entered title or NULL if couldn't get the record title or if the
+//      record with the same title does not exist
+// ERRORS
+//      sets errno to EINVAL if the record with the same title does not exist
 rec *get_target_rec(rec **recs, int rec_num) {
     ls_rec_titles(recs, rec_num);
     char *rec_title = calloc(title_len, sizeof(char));
@@ -180,10 +248,18 @@ rec *get_target_rec(rec **recs, int rec_num) {
     }
 }
 
+// DESCRIPTION
+//      prints out the record to stdout as toml
 void put_rec(rec *rec) {
     printf(rec_printf_toml, rec->title, rec->status, rec->score, rec->prog);
 }
 
+// DESCRIPTION
+//      gets a rec_key
+// RETURN VALUES
+//      returns NO_REC_KEY on error, an actual rec_key on success
+// ERRORS
+//      sets errno to EINVAL if input is not a rec_key
 enum rec_key get_rec_key() {
     char *rec_key = calloc(title_len, sizeof(char));
     if (get_str(rec_key_len, "record key: ", rec_key) == -1) {
@@ -208,45 +284,17 @@ enum rec_key get_rec_key() {
     }
 }
 
-int edit_rec_key(rec *rec, enum rec_key rec_key) {
-    switch (rec_key) {
-        case TITLE: {
-            get_rec_title(rec);
-            return 0;
-        }
-        case STATUS: {
-            get_rec_status(rec);
-            return 0;
-        }
-        case SCORE: {
-            get_rec_score(rec);
-            return 0;
-        }
-        case PROG: {
-            get_rec_prog(rec);
-            return 0;
-        }
-        default:
-            return -1;
-    }
-}
+// DESCRIPTION
+//      a lookup table for record value getters
+int (*rec_key_gets[rec_key_num])(rec *rec) = {get_rec_title,
+                                              get_rec_status,
+                                              get_rec_score,
+                                              get_rec_prog};
 
-enum sort_ord get_sort_ord() {
-    char *sort_ord = calloc(sort_ord_len, sizeof(char));
-    if (get_str(sort_ord_len, "sorting order (ascending or descending): ", sort_ord) == -1) {
-        return -1;
-    }
-    if (strcasecmp(sort_ord, "ascending") == 0) {
-        free(sort_ord);
-        return ASC;
-    } else if (strcasecmp(sort_ord, "descending") == 0) {
-        free(sort_ord);
-        return DESC;
-    } else {
-        free(sort_ord);
-        errno = EINVAL;
-        return NO_SORT_ORD;
-    }
+// DESCRIPTION
+//      prompts the user to edit the value of rec_key of record pointed to by rec
+int edit_rec_key(rec *rec, enum rec_key rec_key) {
+    return rec_key_gets[rec_key](rec);
 }
 
 int new_rec(char *db_name) {
