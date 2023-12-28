@@ -301,60 +301,23 @@ int db_dialog() {
             ls_db_cmnds();
         }
         case NEW_DB: {
-            char *db_name = calloc(FILENAME_MAX, sizeof(char));
-            if (get_db_name(db_name) == -1) {
-                return -1;
-            }
-
-            if (new_db(db_name) == -1) {
-                free(db_name);
+            if (new_db() == -1) {
                 return -1;
             } else {
-                printf("database %s has been created\n", db_name);
-                free(db_name);
                 return 0;
             }
         }
         case OPEN_DB: {
-            if (ls_dbs() == -1) {
-                return -1;
-            }
-
-            char *db_name = calloc(FILENAME_MAX, sizeof(char));
-            if (get_db_name(db_name) == -1) {
-                return -1;
-            }
-
-            if (access(db_name, F_OK) == -1) {
-                free(db_name);
+            if (open_db() == -1) {
                 return -1;
             } else {
-                close_db_flag = 0;
-                do {
-                    if (db_rec_dialog(db_name) == -1) {
-                        perror("error");
-                    }
-                } while (close_db_flag != 1);
-                free(db_name);
                 return 0;
             }
         }
         case DEL_DB: {
-            if (ls_dbs() == -1) {
-                return -1;
-            }
-
-            char *db_name = calloc(FILENAME_MAX, sizeof(char));
-            if (get_db_name(db_name) == -1) {
-                return -1;
-            }
-
-            if (remove(db_name) == -1) {
-                free(db_name);
+            if (delete_db()) {
                 return -1;
             } else {
-                printf("database %s has been deleted", db_name);
-                free(db_name);
                 return 0;
             }
         }

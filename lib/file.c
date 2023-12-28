@@ -16,19 +16,19 @@ int ls_select_dir_ent(char *dir_name, int select(const struct dirent *)) {
     }
 
     struct dirent **dir_ents;
-    int csv_num;
-    if ((csv_num = scandir(dir_name, &dir_ents, select, alphasort)) == -1) {
+    int ent_num = scandir(dir_name, &dir_ents, select, alphasort);
+    if (ent_num == -1) {
         return -1;
     }
 
-    for (int i = 0; i < csv_num; i++) {
+    for (int i = 0; i < ent_num; i++) {
         puts(dir_ents[i]->d_name);
         free(dir_ents[i]);
     }
 
     closedir(dir);
     free(dir_ents);
-    return csv_num;
+    return ent_num;
 }
 
 int get_rec_num_csv(const char *csv_name) {
