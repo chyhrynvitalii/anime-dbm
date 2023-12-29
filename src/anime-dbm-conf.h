@@ -66,7 +66,7 @@ conf_rec *get_target_conf_rec(conf_rec **conf_recs, int db_num, char *db_name);
 int new_conf();
 
 // DESCRIPTION
-//      updates config record
+//      updates database db_name config record
 // RETURN VALUES
 //      returns -1 on error, 0 on success
 int update_conf(char *db_name, enum rec_key rec_key, enum sort_ord sort_ord);
