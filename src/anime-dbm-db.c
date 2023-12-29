@@ -106,32 +106,33 @@ int del_db() {
     if (get_db_name(db_name) == -1) {
         return -1;
     }
-    int db_num = get_db_num();
-    conf_rec **conf_recs = calloc_conf_recs(db_num);
-
-    if (scan_conf_recs(conf_recs, db_num) == -1) {
-        return -1;
-    }
-
-    conf_rec *target_conf_rec = get_target_conf_rec(conf_recs, db_num, db_name);
-    for (int i = 0; i < db_num; i++) {
-        if (target_conf_rec == conf_recs[i]) {
-            free_conf_rec(conf_recs[i]);
-            conf_recs[i] = NULL;
-        }
-    }
-
-    if (write_conf_recs(conf_recs, db_num) == -1) {
-        return -1;
-    } else {
-        printf("database %s config record has been deleted\n", db_name);
-        free_conf_recs(conf_recs, db_num);
-    }
 
     if (remove(db_name) == -1) {
         free(db_name);
         return -1;
     } else {
+        int db_num = get_db_num();
+        conf_rec **conf_recs = calloc_conf_recs(db_num);
+
+        if (scan_conf_recs(conf_recs, db_num) == -1) {
+            return -1;
+        }
+
+        conf_rec *target_conf_rec = get_target_conf_rec(conf_recs, db_num, db_name);
+        for (int i = 0; i < db_num; i++) {
+            if (target_conf_rec == conf_recs[i]) {
+                free_conf_rec(conf_recs[i]);
+                conf_recs[i] = NULL;
+            }
+        }
+
+        if (write_conf_recs(conf_recs, db_num) == -1) {
+            return -1;
+        } else {
+            printf("database %s config record has been deleted\n", db_name);
+            free_conf_recs(conf_recs, db_num);
+        }
+
         printf("database %s has been deleted\n", db_name);
         free(db_name);
     }
