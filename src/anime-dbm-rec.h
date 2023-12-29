@@ -44,6 +44,12 @@ int read_rec(char *db_name);
 int edit_rec(char *db_name);
 
 // DESCRIPTION
+//      gets the database name and sorts it
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int sort_recs(char *db_name);
+
+// DESCRIPTION
 //      gets the title of a record from the database db_name
 //      then deletes the corresponding record from the database
 // RETURN VALUES

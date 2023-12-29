@@ -7,6 +7,7 @@
 #include "file.h"
 #include "get.h"
 #include "maths.h"
+#include "anime-dbm-sort.h"
 
 // DESCRIPTION
 //      max length of a record key as a string
@@ -377,6 +378,52 @@ int edit_rec(char *db_name) {
         return -1;
     } else {
         printf("the record %s has been edited\n", target_rec->title);
+        free_recs(recs, rec_num);
+        return 0;
+    }
+}
+
+int sort_recs(char *db_name) {
+    int rec_num = get_rec_num_csv(db_name);
+    if (rec_num == -1) {
+        free(db_name);
+        return -1;
+    } else if (rec_num == 0) {
+        puts("there are no records in the database");
+        free(db_name);
+        return 0;
+    }
+
+    rec **recs = alloc_recs(rec_num);
+    if (scan_recs(db_name, recs, rec_num) == -1) {
+        free(db_name);
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    enum rec_key rec_key = get_rec_key();
+    if (rec_key == NO_REC_KEY) {
+        free(db_name);
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    enum sort_ord sort_ord = get_sort_ord();
+    if (sort_ord == NO_SORT_ORD) {
+        free(db_name);
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    qsort(recs, rec_num, sizeof(rec *), rec_key_compars[rec_key][sort_ord]);
+
+    if (write_recs(db_name, recs, rec_num) == -1) {
+        free(db_name);
+        free_recs(recs, rec_num);
+        return -1;
+    } else {
+        printf("database %s has been sorted\n", db_name);
+        free(db_name);
         free_recs(recs, rec_num);
         return 0;
     }

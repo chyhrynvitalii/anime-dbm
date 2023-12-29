@@ -10,11 +10,11 @@
 
 // DESCRIPTION
 //      number of database commands
-#define db_cmnd_num     6
+#define db_cmnd_num     5
 
 // DESCRIPTION
 //      number of record commands
-#define rec_cmnd_num    6
+#define rec_cmnd_num    7
 
 // DESCRIPTION
 //      max length of a command as a string
@@ -45,9 +45,6 @@ enum db_cmnd get_db_cmnd() {
     } else if (strcasecmp(cmnd, "open") == 0) {
         free(cmnd);
         return OPEN_DB;
-    } else if (strcasecmp(cmnd, "sort") == 0) {
-        free(cmnd);
-        return SORT_DB;
     } else if (strcasecmp(cmnd, "delete") == 0) {
         free(cmnd);
         return DEL_DB;
@@ -83,6 +80,9 @@ enum rec_cmnd get_rec_cmnd() {
     } else if (strcasecmp(cmnd, "edit") == 0) {
         free(cmnd);
         return EDIT_REC;
+    } else if (strcasecmp(cmnd, "sort") == 0) {
+        free(cmnd);
+        return SORT_RECS;
     } else if (strcasecmp(cmnd, "delete") == 0) {
         free(cmnd);
         return DEL_REC;
@@ -105,7 +105,6 @@ int ls_db_cmnds() {
          "help\tlist commands\n"
          "new\tnew database\n"
          "open\topen database\n"
-         "sort\tsort database\n"
          "delete\tdelete database\n"
          "close\tclose application");
     return 0;
@@ -121,6 +120,7 @@ int ls_rec_cmnds(char *) {
          "new\tnew record\n"
          "read\tread record\n"
          "edit\tedit record\n"
+         "sort\tsort records\n"
          "delete\tdelete record\n"
          "close\tclose database");
     return 0;
@@ -140,6 +140,7 @@ int (*rec_cmnds[rec_cmnd_num])(char *) = {ls_rec_cmnds,
                                           new_rec,
                                           read_rec,
                                           edit_rec,
+                                          sort_recs,
                                           del_rec,
                                           close_db};
 
@@ -165,7 +166,6 @@ int close_dbm() {
 int (*db_cmnds[db_cmnd_num])() = {ls_db_cmnds,
                                   new_db,
                                   open_db,
-                                  sort_db,
                                   del_db,
                                   close_dbm};
 
