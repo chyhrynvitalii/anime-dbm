@@ -432,13 +432,14 @@ int edit_rec(char *db_name) {
     if (write_recs(db_name, recs, rec_num) == -1) {
         free_recs(recs, rec_num);
         return -1;
+    } else {
+        printf("the record %s has been edited\n", target_rec->title);
     }
 
     if (keep_sort(db_name) == -1) {
         free_recs(recs, rec_num);
         return -1;
     } else {
-        printf("the record %s has been edited\n", target_rec->title);
         free_recs(recs, rec_num);
         return 0;
     }
