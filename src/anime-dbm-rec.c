@@ -311,32 +311,41 @@ int keep_sort(char *db_name) {
     int db_num = get_db_num();
     conf_rec **conf_recs = calloc_conf_recs(db_num);
     if (scan_conf_recs(conf_recs, db_num) == -1) {
+        free_conf_recs(conf_recs, db_num);
         return -1;
     }
 
     conf_rec *target_conf_rec = get_target_conf_rec(conf_recs, db_num, db_name);
     if (target_conf_rec == NULL) {
-        return -1;
-    }
-
-    int rec_num = get_rec_num_csv(db_name);
-    rec **recs = alloc_recs(rec_num);
-    if (scan_recs(db_name, recs, rec_num) == -1) {
-        free_recs(recs, rec_num);
+        free_conf_recs(conf_recs, db_num);
         return -1;
     }
 
     if (target_conf_rec->rec_key != NO_REC_KEY && target_conf_rec->sort_ord != NO_SORT_ORD) {
-        qsort(recs, rec_num, sizeof(rec *),
+        int rec_num = get_rec_num_csv(db_name);
+        rec **recs = alloc_recs(rec_num);
+        if (scan_recs(db_name, recs, rec_num) == -1) {
+            free_recs(recs, rec_num);
+            free_conf_recs(conf_recs, db_num);
+            return -1;
+        }
+
+        qsort(recs,
+              rec_num,
+              sizeof(rec *),
               rec_key_compars[target_conf_rec->rec_key][target_conf_rec->sort_ord]);
+
+        if (write_recs(db_name, recs, rec_num) == -1) {
+            free_recs(recs, rec_num);
+            free_conf_recs(conf_recs, db_num);
+            return -1;
+        } else {
+            free_recs(recs, rec_num);
+            free_conf_recs(conf_recs, db_num);
+        }
     }
 
-    if (write_recs(db_name, recs, rec_num) == -1) {
-        return -1;
-    } else {
-        free_recs(recs, rec_num);
-        return 0;
-    }
+    return 0;
 }
 
 int new_rec(char *db_name) {
@@ -462,7 +471,10 @@ int sort_recs(char *db_name) {
         return -1;
     }
 
-    qsort(recs, rec_num, sizeof(rec *), rec_key_compars[rec_key][sort_ord]);
+    qsort(recs,
+          rec_num,
+          sizeof(rec *),
+          rec_key_compars[rec_key][sort_ord]);
 
     if (write_recs(db_name, recs, rec_num) == -1) {
         free_recs(recs, rec_num);
