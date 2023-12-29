@@ -54,6 +54,7 @@ enum sort_ord get_sort_ord() {
     if (get_str(sort_ord_len, "sorting order (ascending or descending): ", sort_ord) == -1) {
         return -1;
     }
+
     if (strcasecmp(sort_ord, "ascending") == 0) {
         free(sort_ord);
         return ASC;

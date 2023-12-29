@@ -5,8 +5,23 @@
 
 #include "str.h"
 
+// initializing current directory relative path
+
+const char *cur_dir = ".";
+
 int select_csv(const struct dirent *dir_ent) {
     return ends_substr(dir_ent->d_name, ".csv");
+}
+
+int get_select_dir_ent_num(const char *dir_name, int select(const struct dirent *)) {
+    DIR *dir = opendir(dir_name);
+    if (dir == NULL) {
+        return -1;
+    }
+    struct dirent **dir_ents;
+    int ent_num = scandir(dir_name, &dir_ents, select, alphasort);
+    closedir(dir);
+    return ent_num;
 }
 
 int ls_select_dir_ent(const char *dir_name, int select(const struct dirent *)) {

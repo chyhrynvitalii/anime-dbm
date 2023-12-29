@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "anime-dbm-conf.h"
 #include "anime-dbm-rec.h"
 #include "file.h"
 #include "get.h"
@@ -39,10 +40,10 @@ const char *rec_printf_toml = "[%s]\n"
 // DESCRIPTION
 //      returns a pointer to memory allocated for a record
 rec *alloc_rec() {
-    rec *rec = calloc(1, sizeof(*rec));
-    rec->title = calloc(title_len, sizeof(char));
-    rec->status = calloc(status_len, sizeof(char));
-    return rec;
+    rec *rec_ptr = calloc(1, sizeof(rec));
+    rec_ptr->title = calloc(title_len, sizeof(char));
+    rec_ptr->status = calloc(status_len, sizeof(char));
+    return rec_ptr;
 }
 
 // DESCRIPTION
@@ -56,7 +57,7 @@ void free_rec(rec *rec) {
 // DESCRIPTION
 //      returns a pointer to memory allocated for rec_num record pointers
 rec **alloc_recs(int rec_num) {
-    rec **recs = calloc(rec_num, sizeof(rec));
+    rec **recs = calloc(rec_num, sizeof(rec *));
     for (int i = 0; i < rec_num; ++i) {
         recs[i] = alloc_rec();
     }
@@ -79,8 +80,9 @@ void free_recs(rec **recs, int rec_num) {
 int get_rec_title(rec *rec) {
     if (get_str(title_len, "title: ", rec->title) == -1) {
         return -1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 // DESCRIPTION
@@ -90,8 +92,9 @@ int get_rec_title(rec *rec) {
 int get_rec_status(rec *rec) {
     if (get_str(status_len, "status: ", rec->status) == -1) {
         return -1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 // DESCRIPTION
@@ -106,8 +109,9 @@ int get_rec_score(rec *rec) {
     } else if (!in_closed_inter(rec->score, score_low, score_up)) {
         errno = EDOM;
         return -1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 // DESCRIPTION
@@ -117,8 +121,9 @@ int get_rec_score(rec *rec) {
 int get_rec_prog(rec *rec) {
     if (get_uint(prog_len, "progress: ", &rec->prog) == -1) {
         return -1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 // DESCRIPTION
@@ -128,17 +133,15 @@ int get_rec_prog(rec *rec) {
 int get_rec(rec *rec) {
     if (get_rec_title(rec) == -1) {
         return -1;
-    }
-    if (get_rec_status(rec) == -1) {
+    } else if (get_rec_status(rec) == -1) {
         return -1;
-    }
-    if (get_rec_score(rec) == -1) {
+    } else if (get_rec_score(rec) == -1) {
         return -1;
-    }
-    if (get_rec_prog(rec) == -1) {
+    } else if (get_rec_prog(rec) == -1) {
         return -1;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 // DESCRIPTION
@@ -298,19 +301,61 @@ int edit_rec_key(rec *rec, enum rec_key rec_key) {
     return rec_key_gets[rec_key](rec);
 }
 
-int new_rec(char *db_name) {
-    rec *rec = alloc_rec();
-
-    if (get_rec(rec) == -1) {
-        free_rec(rec);
+// DESCRIPTION
+//      keeps sorting in the database
+// RETURN VALUES
+//      returns -1 on error, 0 on success
+int keep_sort(char *db_name) {
+    int db_num = get_db_num();
+    conf_rec **conf_recs = calloc_conf_recs(db_num);
+    if (scan_conf_recs(conf_recs, db_num) == -1) {
         return -1;
     }
 
-    if (append_rec(db_name, rec) == -1) {
+    conf_rec *target_conf_rec = get_target_conf_rec(conf_recs, db_num, db_name);
+    if (target_conf_rec == NULL) {
+        return -1;
+    }
+
+    int rec_num = get_rec_num_csv(db_name);
+    rec **recs = alloc_recs(rec_num);
+    if (scan_recs(db_name, recs, rec_num) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
+    }
+
+    if (target_conf_rec->rec_key != NO_REC_KEY && target_conf_rec->sort_ord != NO_SORT_ORD) {
+        qsort(recs, rec_num, sizeof(rec *),
+              rec_key_compars[target_conf_rec->rec_key][target_conf_rec->sort_ord]);
+    }
+
+    if (write_recs(db_name, recs, rec_num) == -1) {
         return -1;
     } else {
-        printf("record %s has been created\n", rec->title);
-        free_rec(rec);
+        free_recs(recs, rec_num);
+        return 0;
+    }
+}
+
+int new_rec(char *db_name) {
+    rec *new_rec = alloc_rec();
+
+    if (get_rec(new_rec) == -1) {
+        free_rec(new_rec);
+        return -1;
+    }
+
+    if (append_rec(db_name, new_rec) == -1) {
+        free_rec(new_rec);
+        return -1;
+    } else {
+        printf("record %s has been created\n", new_rec->title);
+        free_rec(new_rec);
+    }
+
+    if (keep_sort(db_name) == -1) {
+        return -1;
+    } else {
         return 0;
     }
 }
@@ -376,6 +421,11 @@ int edit_rec(char *db_name) {
     if (write_recs(db_name, recs, rec_num) == -1) {
         free_recs(recs, rec_num);
         return -1;
+    }
+
+    if (keep_sort(db_name) == -1) {
+        free_recs(recs, rec_num);
+        return -1;
     } else {
         printf("the record %s has been edited\n", target_rec->title);
         free_recs(recs, rec_num);
@@ -386,31 +436,26 @@ int edit_rec(char *db_name) {
 int sort_recs(char *db_name) {
     int rec_num = get_rec_num_csv(db_name);
     if (rec_num == -1) {
-        free(db_name);
         return -1;
     } else if (rec_num == 0) {
         puts("there are no records in the database");
-        free(db_name);
         return 0;
     }
 
     rec **recs = alloc_recs(rec_num);
     if (scan_recs(db_name, recs, rec_num) == -1) {
-        free(db_name);
         free_recs(recs, rec_num);
         return -1;
     }
 
     enum rec_key rec_key = get_rec_key();
     if (rec_key == NO_REC_KEY) {
-        free(db_name);
         free_recs(recs, rec_num);
         return -1;
     }
 
     enum sort_ord sort_ord = get_sort_ord();
     if (sort_ord == NO_SORT_ORD) {
-        free(db_name);
         free_recs(recs, rec_num);
         return -1;
     }
@@ -418,13 +463,16 @@ int sort_recs(char *db_name) {
     qsort(recs, rec_num, sizeof(rec *), rec_key_compars[rec_key][sort_ord]);
 
     if (write_recs(db_name, recs, rec_num) == -1) {
-        free(db_name);
         free_recs(recs, rec_num);
         return -1;
     } else {
         printf("database %s has been sorted\n", db_name);
-        free(db_name);
         free_recs(recs, rec_num);
+    }
+
+    if (update_conf(db_name, rec_key, sort_ord) == -1) {
+        return -1;
+    } else {
         return 0;
     }
 }
@@ -463,6 +511,11 @@ int del_rec(char *db_name) {
     } else {
         puts("the record has been deleted");
         free_recs(recs, rec_num);
+    }
+
+    if (keep_sort(db_name) == -1) {
+        return -1;
+    } else {
         return 0;
     }
 }

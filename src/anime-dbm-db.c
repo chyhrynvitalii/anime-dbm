@@ -1,16 +1,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
+#include "anime-dbm-conf.h"
 #include "anime-dbm-db.h"
 #include "anime-dbm-dialog.h"
 #include "file.h"
 #include "get.h"
 #include "str.h"
-
-// DESCRIPTION
-//      current directory relative path
-const char *cur_dir = ".";
 
 // DESCRIPTION
 //      csv file extension
@@ -54,8 +52,18 @@ int new_db() {
     if (db == NULL) {
         free(db_name);
         return -1;
+    }
+
+    conf_rec *conf_rec = calloc_conf_rec();
+    strcpy(conf_rec->db_name, db_name);
+    if (append_conf_rec(conf_rec) == -1) {
+        free(db_name);
+        free_conf_rec(conf_rec);
+        return -1;
     } else {
-        printf("database %s has been created\n", db_name);
+        printf("database %s config record has been created\n"
+               "database %s has been created\n", db_name, db_name);
+        free_conf_rec(conf_rec);
         free(db_name);
         fclose(db);
         return 0;
@@ -98,6 +106,27 @@ int del_db() {
     if (get_db_name(db_name) == -1) {
         return -1;
     }
+    int db_num = get_db_num();
+    conf_rec **conf_recs = calloc_conf_recs(db_num);
+
+    if (scan_conf_recs(conf_recs, db_num) == -1) {
+        return -1;
+    }
+
+    conf_rec *target_conf_rec = get_target_conf_rec(conf_recs, db_num, db_name);
+    for (int i = 0; i < db_num; i++) {
+        if (target_conf_rec == conf_recs[i]) {
+            free_conf_rec(conf_recs[i]);
+            conf_recs[i] = NULL;
+        }
+    }
+
+    if (write_conf_recs(conf_recs, db_num) == -1) {
+        return -1;
+    } else {
+        printf("database %s config record has been deleted\n", db_name);
+        free_conf_recs(conf_recs, db_num);
+    }
 
     if (remove(db_name) == -1) {
         free(db_name);
@@ -105,6 +134,6 @@ int del_db() {
     } else {
         printf("database %s has been deleted\n", db_name);
         free(db_name);
-        return 0;
     }
+    return 0;
 }
