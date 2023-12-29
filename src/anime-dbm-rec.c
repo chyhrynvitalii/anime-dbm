@@ -49,9 +49,11 @@ rec *alloc_rec() {
 // DESCRIPTION
 //      deallocates memory allocated for a record pointed to by rec
 void free_rec(rec *rec) {
-    free(rec->title);
-    free(rec->status);
-    free(rec);
+    if (rec != NULL) {
+        free(rec->title);
+        free(rec->status);
+        free(rec);
+    }
 }
 
 // DESCRIPTION
